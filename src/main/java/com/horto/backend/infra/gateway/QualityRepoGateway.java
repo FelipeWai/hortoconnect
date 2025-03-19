@@ -63,4 +63,12 @@ public class QualityRepoGateway implements QualityGateway {
         QualityEntity savedEntity = qualityRepository.save(entity);
         return qualityMapper.toDomain(savedEntity);
     }
+
+    @Override
+    public List<Quality> getAllQualitiesById(List<Long> ids) {
+        List<QualityEntity> entityList = qualityRepository.findAllByIdIn(ids);
+        return entityList.stream()
+                .map(qualityMapper::toDomain)
+                .collect(Collectors.toList());
+    }
 }

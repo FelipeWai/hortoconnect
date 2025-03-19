@@ -14,4 +14,6 @@ public interface SizeMapper {
     SizeResponseDTO toResponseDTO(Size size);
 
     SizeEntity toEntity(SizeRequestDTO sizeRequestDTO);
+    SizeEntity toEntity(Size size);
+
 }

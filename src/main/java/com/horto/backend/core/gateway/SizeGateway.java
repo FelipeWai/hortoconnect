@@ -10,6 +10,8 @@ public interface SizeGateway {
 
     List<Size> getAllSizes();
 
+    List<Size> getAllSizesById(List<Long> ids);
+
     Optional<Size> getSizeById(Long id);
 
     Size createSize(SizeRequestDTO size);

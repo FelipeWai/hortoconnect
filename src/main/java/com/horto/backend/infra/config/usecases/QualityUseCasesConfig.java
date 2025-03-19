@@ -34,4 +34,9 @@ public class QualityUseCasesConfig {
         return new GetQualityByNameCaseImpl(qualityRepoGateway);
     }
 
+    @Bean
+    public GetAllQualitiesByIdCase getAllQualitiesByIdCase() {
+        return new GetAllQualitiesByIdCaseImpl(qualityRepoGateway);
+    }
+
 }

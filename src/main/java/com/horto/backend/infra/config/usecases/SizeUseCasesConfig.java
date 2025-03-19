@@ -33,4 +33,9 @@ public class SizeUseCasesConfig {
     public GetSizeByNameCase getSizeByNameCase() {
         return new GetSizeByNameCaseImpl(sizeRepoGateway);
     }
+
+    @Bean
+    public GetAllSizesByIdCase getAllSizesByIdCase() {
+        return new GetAllSizesByIdCaseImpl(sizeRepoGateway);
+    }
 }

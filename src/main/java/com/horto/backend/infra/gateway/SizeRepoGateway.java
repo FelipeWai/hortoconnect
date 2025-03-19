@@ -59,4 +59,12 @@ public class SizeRepoGateway implements SizeGateway {
         SizeEntity savedEntity = sizeRepository.save(entity);
         return sizeMapper.toDomain(savedEntity);
     }
+
+    @Override
+    public List<Size> getAllSizesById(List<Long> ids) {
+        List<SizeEntity> entityList = sizeRepository.findAllByIdIn(ids);
+        return entityList.stream()
+                .map(sizeMapper::toDomain)
+                .collect(Collectors.toList());
+    }
 }

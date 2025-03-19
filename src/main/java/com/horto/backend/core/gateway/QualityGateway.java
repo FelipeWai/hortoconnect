@@ -10,6 +10,8 @@ public interface QualityGateway {
 
     List<Quality> getAllQualities();
 
+    List<Quality> getAllQualitiesById(List<Long> ids);
+
     Optional<Quality> getQualityById(Long id);
 
     Optional<Quality> getQualityByName(String name);

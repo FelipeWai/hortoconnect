@@ -14,5 +14,5 @@ public interface QualityMapper {
     QualityResponseDTO toResponseDTO(Quality quality);
 
     QualityEntity toEntity(QualityRequestDTO qualityRequestDTO);
-
+    QualityEntity toEntity(Quality quality);
 }
