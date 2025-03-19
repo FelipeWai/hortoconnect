@@ -1,4 +1,4 @@
-package com.horto.backend.infra.exception;
+package com.horto.backend.infra.exception.global;
 
 import com.horto.backend.core.exceptions.category.CategoryAlreadyExists;
 import com.horto.backend.core.exceptions.category.CategoryNotFoundException;
@@ -12,25 +12,6 @@ import java.util.List;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-    @ExceptionHandler(CategoryNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleCategoryNotFoundException(CategoryNotFoundException ex) {
-        ErrorResponse error = new ErrorResponse(
-                HttpStatus.NOT_FOUND.value(),
-                ex.getMessage()
-        );
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(CategoryAlreadyExists.class)
-    public ResponseEntity<ErrorResponse> handleCategoryAlreadyExists(CategoryAlreadyExists ex) {
-        ErrorResponse error = new ErrorResponse(
-                HttpStatus.BAD_REQUEST.value(),
-                ex.getMessage()
-        );
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
-    }
-
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {

@@ -1,0 +1,1 @@
+ALTER TABLE size RENAME COLUMN nome TO name;

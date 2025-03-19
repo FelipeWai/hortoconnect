@@ -51,7 +51,7 @@ public class CategoryRepoGateway implements CategoryGateway {
 
     @Override
     public Category createCategory(CategoryRequestDTO categoryRequestDTO) {
-        if (getCategoryByName(categoryRequestDTO.name()).isPresent()) {
+        if (getCategoryByName(categoryRequestDTO.name().trim().toLowerCase()).isPresent()) {
             throw new CategoryAlreadyExists(categoryRequestDTO.name());
         }
 

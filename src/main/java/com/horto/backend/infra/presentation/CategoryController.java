@@ -48,12 +48,6 @@ public class CategoryController {
         return ResponseEntity.ok(categoryMapper.toResponseDTO(category));
     }
 
-    @GetMapping("/name/{name}")
-    public ResponseEntity<CategoryResponseDTO> getCategoryByName(@PathVariable String name) {
-        Category category = getCategoryByNameCase.execute(name);
-        return ResponseEntity.ok(categoryMapper.toResponseDTO(category));
-    }
-
     @PostMapping
     public ResponseEntity<CategoryResponseDTO> createCategory(@RequestBody @Valid CategoryRequestDTO categoryRequestDTO) {
         Category newCategory = createCategoryCase.execute(categoryRequestDTO);
