@@ -4,8 +4,7 @@ import java.time.LocalDateTime;
 
 public record Category(
         Long id,
-        String nome,
+        String name,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
-) {
-}
+) {}
