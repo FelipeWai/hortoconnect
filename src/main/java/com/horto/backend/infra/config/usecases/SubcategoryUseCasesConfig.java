@@ -2,10 +2,7 @@ package com.horto.backend.infra.config.usecases;
 
 import com.horto.backend.core.usecases.subcategory.delete.DeleteSubcategoryByIdCase;
 import com.horto.backend.core.usecases.subcategory.delete.DeleteSubcategoryByIdCaseImpl;
-import com.horto.backend.core.usecases.subcategory.get.GetAllSubcategoriesCase;
-import com.horto.backend.core.usecases.subcategory.get.GetAllSubcategoriesCaseImpl;
-import com.horto.backend.core.usecases.subcategory.get.GetSubcategoryByIdCase;
-import com.horto.backend.core.usecases.subcategory.get.GetSubcategoryByIdCaseImpl;
+import com.horto.backend.core.usecases.subcategory.get.*;
 import com.horto.backend.core.usecases.subcategory.patch.PatchSubcategoryByIdCase;
 import com.horto.backend.core.usecases.subcategory.patch.PatchSubcategoryByIdCaseImpl;
 import com.horto.backend.core.usecases.subcategory.post.CreateSubcategoryCase;
@@ -44,6 +41,11 @@ public class SubcategoryUseCasesConfig {
     @Bean
     public DeleteSubcategoryByIdCase deleteSubcategoryByIdCase() {
         return new DeleteSubcategoryByIdCaseImpl(subcategoryRepoGateway);
+    }
+
+    @Bean
+    public GetSubcategoryByNameCase getSubcategoryByNameCase() {
+        return new GetSubcategoryByNameCaseImpl(subcategoryRepoGateway);
     }
 
 }

@@ -1,13 +1,14 @@
 package com.horto.backend.infra.gateway;
 
 import com.horto.backend.core.entities.Quality;
-import com.horto.backend.core.exceptions.category.CategoryAlreadyExists;
 import com.horto.backend.core.exceptions.quality.QualityAlreadyExists;
+import com.horto.backend.core.exceptions.quality.QualityNotFoundException;
 import com.horto.backend.core.gateway.QualityGateway;
 import com.horto.backend.infra.dto.quality.request.QualityRequestDTO;
 import com.horto.backend.infra.mapper.QualityMapper;
 import com.horto.backend.infra.persistence.entities.QualityEntity;
 import com.horto.backend.infra.persistence.repositories.QualityRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -70,5 +71,15 @@ public class QualityRepoGateway implements QualityGateway {
         return entityList.stream()
                 .map(qualityMapper::toDomain)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    @Override
+    public void deleteQualityById(Long id) {
+        if (getQualityById(id).isPresent()) {
+            qualityRepository.deleteById(id);
+        }else{
+            throw new QualityNotFoundException(id.toString());
+        }
     }
 }

@@ -1,5 +1,7 @@
 package com.horto.backend.infra.config.usecases;
 
+import com.horto.backend.core.usecases.quality.delete.DeleteQualityByIdCase;
+import com.horto.backend.core.usecases.quality.delete.DeleteQualityByIdCaseImpl;
 import com.horto.backend.core.usecases.quality.get.*;
 import com.horto.backend.core.usecases.quality.post.CreateQualityCase;
 import com.horto.backend.core.usecases.quality.post.CreateQualityCaseImpl;
@@ -37,6 +39,11 @@ public class QualityUseCasesConfig {
     @Bean
     public GetAllQualitiesByIdCase getAllQualitiesByIdCase() {
         return new GetAllQualitiesByIdCaseImpl(qualityRepoGateway);
+    }
+
+    @Bean
+    public DeleteQualityByIdCase deleteQualityByIdCase() {
+        return new DeleteQualityByIdCaseImpl(qualityRepoGateway);
     }
 
 }

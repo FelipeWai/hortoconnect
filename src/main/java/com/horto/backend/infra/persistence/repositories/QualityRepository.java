@@ -12,4 +12,6 @@ public interface QualityRepository extends JpaRepository<QualityEntity, Integer>
     Optional<QualityEntity> findByName(String name);
 
     List<QualityEntity> findAllByIdIn(List<Long> id);
+
+    void deleteById(Long id);
 }

@@ -1,9 +1,9 @@
-package com.horto.backend.infra.exception.subcategory;
+package com.horto.backend.infra.exception.product;
 
-import com.horto.backend.core.exceptions.size.SizeAlreadyExists;
-import com.horto.backend.core.exceptions.size.SizeNotFoundException;
-import com.horto.backend.core.exceptions.subcategory.SubcategoryAlreadyExistsException;
-import com.horto.backend.core.exceptions.subcategory.SubcategoryNotFoundException;
+import com.horto.backend.core.exceptions.product.ProductAlreadyExists;
+import com.horto.backend.core.exceptions.product.ProductNotFoundException;
+import com.horto.backend.core.exceptions.quality.QualityAlreadyExists;
+import com.horto.backend.core.exceptions.quality.QualityNotFoundException;
 import com.horto.backend.infra.exception.global.GlobalExceptionHandler;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
-public class SubcategoryExceptionHandler {
+public class ProductExceptionHandler {
 
-    @ExceptionHandler(SubcategoryNotFoundException.class)
-    public ResponseEntity<GlobalExceptionHandler.ErrorResponse> handleCategoryNotFoundException(SubcategoryNotFoundException ex) {
+    @ExceptionHandler(ProductNotFoundException.class)
+    public ResponseEntity<GlobalExceptionHandler.ErrorResponse> handleCategoryNotFoundException(ProductNotFoundException ex) {
         GlobalExceptionHandler.ErrorResponse error = new GlobalExceptionHandler.ErrorResponse(
                 HttpStatus.NOT_FOUND.value(),
                 ex.getMessage()
@@ -22,14 +22,15 @@ public class SubcategoryExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(SubcategoryAlreadyExistsException.class)
-    public ResponseEntity<GlobalExceptionHandler.ErrorResponse> handleCategoryNotFoundException(SubcategoryAlreadyExistsException ex) {
+    @ExceptionHandler(ProductAlreadyExists.class)
+    public ResponseEntity<GlobalExceptionHandler.ErrorResponse> handleCategoryAlreadyExists(ProductAlreadyExists ex) {
         GlobalExceptionHandler.ErrorResponse error = new GlobalExceptionHandler.ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 ex.getMessage()
         );
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
+
 
     public static class ErrorResponse {
         private final int status;

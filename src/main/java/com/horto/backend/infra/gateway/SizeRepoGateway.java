@@ -2,11 +2,13 @@ package com.horto.backend.infra.gateway;
 
 import com.horto.backend.core.entities.Size;
 import com.horto.backend.core.exceptions.size.SizeAlreadyExists;
+import com.horto.backend.core.exceptions.size.SizeNotFoundException;
 import com.horto.backend.core.gateway.SizeGateway;
 import com.horto.backend.infra.dto.size.request.SizeRequestDTO;
 import com.horto.backend.infra.mapper.SizeMapper;
 import com.horto.backend.infra.persistence.entities.SizeEntity;
 import com.horto.backend.infra.persistence.repositories.SizeRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -66,5 +68,15 @@ public class SizeRepoGateway implements SizeGateway {
         return entityList.stream()
                 .map(sizeMapper::toDomain)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    @Override
+    public void deleteSizeById(Long id) {
+        if(getSizeById(id).isPresent()){
+            sizeRepository.deleteById(id);
+        }else{
+            throw new SizeNotFoundException(id.toString());
+        }
     }
 }

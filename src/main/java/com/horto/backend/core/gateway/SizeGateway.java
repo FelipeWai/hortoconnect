@@ -17,4 +17,6 @@ public interface SizeGateway {
     Size createSize(SizeRequestDTO size);
 
     Optional<Size> getSizeByName(String name);
+
+    void deleteSizeById(Long id);
 }

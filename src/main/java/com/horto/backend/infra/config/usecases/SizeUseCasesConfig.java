@@ -1,5 +1,7 @@
 package com.horto.backend.infra.config.usecases;
 
+import com.horto.backend.core.usecases.size.delete.DeleteSizeByIdCase;
+import com.horto.backend.core.usecases.size.delete.DeleteSizeByIdCaseImpl;
 import com.horto.backend.core.usecases.size.get.*;
 import com.horto.backend.core.usecases.size.post.CreateSizeCase;
 import com.horto.backend.core.usecases.size.post.CreateSizeCaseImpl;
@@ -37,5 +39,10 @@ public class SizeUseCasesConfig {
     @Bean
     public GetAllSizesByIdCase getAllSizesByIdCase() {
         return new GetAllSizesByIdCaseImpl(sizeRepoGateway);
+    }
+
+    @Bean
+    public DeleteSizeByIdCase deleteSizeByIdCase() {
+        return new DeleteSizeByIdCaseImpl(sizeRepoGateway);
     }
 }

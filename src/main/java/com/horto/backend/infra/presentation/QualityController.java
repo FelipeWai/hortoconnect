@@ -2,6 +2,7 @@ package com.horto.backend.infra.presentation;
 
 import com.horto.backend.core.entities.Quality;
 import com.horto.backend.core.entities.Size;
+import com.horto.backend.core.usecases.quality.delete.DeleteQualityByIdCase;
 import com.horto.backend.core.usecases.quality.get.GetAllQualitiesCase;
 import com.horto.backend.core.usecases.quality.get.GetQualityByIdCase;
 import com.horto.backend.core.usecases.quality.post.CreateQualityCase;
@@ -21,12 +22,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class QualityController {
 
+    private final DeleteQualityByIdCase deleteQualityByIdCase;
+
     private final CreateQualityCase createQualityCase;
 
     private final GetAllQualitiesCase getAllQualitiesCase;
     private final GetQualityByIdCase getQualityByIdCase;
 
     private final QualityMapper qualityMapper;
+
 
     @GetMapping
     public ResponseEntity<List<QualityResponseDTO>> getAllQualities() {
@@ -47,6 +51,12 @@ public class QualityController {
     public ResponseEntity<QualityResponseDTO> createQuality(@RequestBody QualityRequestDTO qualityRequestDTO) {
         Quality quality = createQualityCase.createQuality(qualityRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(qualityMapper.toResponseDTO(quality));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteQualityById(@PathVariable Long id) {
+        deleteQualityByIdCase.execute(id);
+        return ResponseEntity.noContent().build();
     }
 
 }

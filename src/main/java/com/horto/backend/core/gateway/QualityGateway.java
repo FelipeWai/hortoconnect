@@ -18,4 +18,6 @@ public interface QualityGateway {
 
     Quality createQuality(QualityRequestDTO quality);
 
+    void deleteQualityById(Long id);
+
 }

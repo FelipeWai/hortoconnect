@@ -1,6 +1,7 @@
 package com.horto.backend.infra.presentation;
 
 import com.horto.backend.core.entities.Size;
+import com.horto.backend.core.usecases.size.delete.DeleteSizeByIdCase;
 import com.horto.backend.core.usecases.size.get.GetAllSizesCase;
 import com.horto.backend.core.usecases.size.get.GetSizeByIdCase;
 import com.horto.backend.core.usecases.size.post.CreateSizeCase;
@@ -26,6 +27,8 @@ public class SizeController {
     private final GetAllSizesCase getAllSizesCase;
     private final GetSizeByIdCase getSizeByIdCase;
 
+    private final DeleteSizeByIdCase deleteSizeByIdCase;
+
     private final SizeMapper sizeMapper;
 
     @GetMapping
@@ -48,6 +51,12 @@ public class SizeController {
     public ResponseEntity<SizeResponseDTO> createSize(@RequestBody @Valid SizeRequestDTO requestDTO) {
         Size size = createSizeCase.execute(requestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(sizeMapper.toResponseDTO(size));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteSizeById(@PathVariable Long id) {
+        deleteSizeByIdCase.execute(id);
+        return ResponseEntity.noContent().build();
     }
 
 }

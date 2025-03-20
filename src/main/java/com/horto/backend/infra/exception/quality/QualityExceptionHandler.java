@@ -2,8 +2,6 @@ package com.horto.backend.infra.exception.quality;
 
 import com.horto.backend.core.exceptions.quality.QualityAlreadyExists;
 import com.horto.backend.core.exceptions.quality.QualityNotFoundException;
-import com.horto.backend.core.exceptions.size.SizeAlreadyExists;
-import com.horto.backend.core.exceptions.size.SizeNotFoundException;
 import com.horto.backend.infra.exception.global.GlobalExceptionHandler;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

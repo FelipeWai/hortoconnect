@@ -5,7 +5,9 @@ import com.horto.backend.core.entities.Quality;
 import com.horto.backend.core.entities.Size;
 import com.horto.backend.core.entities.Subcategory;
 import com.horto.backend.core.exceptions.category.CategoryNotFoundException;
+import com.horto.backend.core.exceptions.quality.QualityNotFoundException;
 import com.horto.backend.core.exceptions.size.SizeNotFoundException;
+import com.horto.backend.core.exceptions.subcategory.SubcategoryAlreadyExistsException;
 import com.horto.backend.core.exceptions.subcategory.SubcategoryNotFoundException;
 import com.horto.backend.core.gateway.SubcategoryGateway;
 import com.horto.backend.core.usecases.category.get.GetCategoryByIdCase;
@@ -20,14 +22,18 @@ import com.horto.backend.infra.mapper.CategoryMapper;
 import com.horto.backend.infra.mapper.QualityMapper;
 import com.horto.backend.infra.mapper.SizeMapper;
 import com.horto.backend.infra.mapper.SubcategoryMapper;
+import com.horto.backend.infra.persistence.entities.QualityEntity;
+import com.horto.backend.infra.persistence.entities.SizeEntity;
 import com.horto.backend.infra.persistence.entities.SubcategoryEntity;
 import com.horto.backend.infra.persistence.repositories.SubcategoryRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -68,9 +74,21 @@ public class SubcategoryRepoGateway implements SubcategoryGateway {
         return Optional.empty();
     }
 
+    @Override
+    public Optional<Subcategory> getSubcategoryByName(String name) {
+        Optional<SubcategoryEntity> entityOptional = subcategoryRepository.findByName(name);
+        if (entityOptional.isPresent()) {
+            return Optional.of(subcategoryMapper.toDomain(entityOptional.get()));
+        }
+        return Optional.empty();
+    }
 
     @Override
     public Subcategory crateSubcategory(SubcategoryRequestDTO subcategory) {
+        if(getSubcategoryByName(subcategory.name()).isPresent()){
+            throw new SubcategoryAlreadyExistsException(subcategory.name());
+        }
+
         List<Quality> qualityList = subcategory.qualities_id().stream()
                 .map(getQualityByIdCase::execute)
                 .collect(Collectors.toList());
@@ -100,35 +118,74 @@ public class SubcategoryRepoGateway implements SubcategoryGateway {
 
     @Override
     public Subcategory patchSubcategoryById(Long id, SubcategoryPatchDTO patchDTO) {
-        Subcategory subcategoryToUpdate = getSubcategoryById(id).orElseThrow(() -> new SizeNotFoundException(id.toString()));
+        Subcategory subcategoryToUpdate = getSubcategoryById(id)
+                .orElseThrow(() -> new SubcategoryNotFoundException(id.toString()));
+
         SubcategoryEntity subcategoryEntityToUpdate = subcategoryMapper.toEntity(subcategoryToUpdate);
 
-        patchDTO.name().ifPresent(subcategoryEntityToUpdate::setName);
+        boolean hasChanges = false;
 
-        patchDTO.category_id().ifPresent(categoryId ->{
-           Category category = getCategoryByIdCase.execute(categoryId);
-           subcategoryEntityToUpdate.setCategory(categoryMapper.toEntity(category));
-        });
-
-        patchDTO.qualities_id().ifPresent(qualitiesId ->{
-            List<Quality> qualities = getAllQualitiesByIdCase.execute(qualitiesId);
-            if (qualities.size() != qualitiesId.size()) {
-                throw new CategoryNotFoundException(qualitiesId.toString());
+        if (patchDTO.name().isPresent()) {
+            String newName = patchDTO.name().get();
+            if (!newName.equals(subcategoryEntityToUpdate.getName())) {
+                subcategoryEntityToUpdate.setName(newName);
+                hasChanges = true;
             }
-            subcategoryEntityToUpdate.setQualities(qualities.stream().map(qualityMapper::toEntity).collect(Collectors.toList()));
-        });
+        }
 
-        patchDTO.sizes_id().ifPresent(sizesId ->{
-            List<Size> sizes = getAllSizesByIdCase.execute(sizesId);
-            if (sizes.size() != sizesId.size()) {
-                throw new SizeNotFoundException(sizesId.toString());
+        if (patchDTO.category_id().isPresent()) {
+            Long newCategoryId = patchDTO.category_id().get();
+            if (!newCategoryId.equals(subcategoryEntityToUpdate.getCategory().getId())) {
+                Category category = getCategoryByIdCase.execute(newCategoryId);
+                subcategoryEntityToUpdate.setCategory(categoryMapper.toEntity(category));
+                hasChanges = true;
             }
-            subcategoryEntityToUpdate.setSizes(sizes.stream().map(sizeMapper::toEntity).collect(Collectors.toList()));
-        });
+        }
 
-        SubcategoryEntity savedEntity = subcategoryRepository.save(subcategoryEntityToUpdate);
+        if (patchDTO.qualities_id().isPresent()) {
+            List<Long> newQualitiesIds = patchDTO.qualities_id().get();
+            Set<Long> currentQualityIds = subcategoryEntityToUpdate.getQualities().stream()
+                    .map(QualityEntity::getId)
+                    .collect(Collectors.toSet());
+            Set<Long> newQualityIdsSet = new HashSet<>(newQualitiesIds);
 
-        return subcategoryMapper.toDomain(savedEntity);
+            if (!currentQualityIds.equals(newQualityIdsSet)) {
+                List<Quality> qualities = getAllQualitiesByIdCase.execute(newQualitiesIds);
+                if (qualities.size() != newQualitiesIds.size()) {
+                    throw new QualityNotFoundException(newQualitiesIds.toString());
+                }
+                subcategoryEntityToUpdate.setQualities(qualities.stream()
+                        .map(qualityMapper::toEntity)
+                        .collect(Collectors.toList()));
+                hasChanges = true;
+            }
+        }
+
+        if (patchDTO.sizes_id().isPresent()) {
+            List<Long> newSizesIds = patchDTO.sizes_id().get();
+            Set<Long> currentSizeIds = subcategoryEntityToUpdate.getSizes().stream()
+                    .map(SizeEntity::getId)
+                    .collect(Collectors.toSet());
+            Set<Long> newSizeIdsSet = new HashSet<>(newSizesIds);
+
+            if (!currentSizeIds.equals(newSizeIdsSet)) {
+                List<Size> sizes = getAllSizesByIdCase.execute(newSizesIds);
+                if (sizes.size() != newSizesIds.size()) {
+                    throw new SizeNotFoundException(newSizesIds.toString());
+                }
+                subcategoryEntityToUpdate.setSizes(sizes.stream()
+                        .map(sizeMapper::toEntity)
+                        .collect(Collectors.toList()));
+                hasChanges = true;
+            }
+        }
+
+        if (hasChanges) {
+            SubcategoryEntity savedEntity = subcategoryRepository.save(subcategoryEntityToUpdate);
+            return subcategoryMapper.toDomain(savedEntity);
+        } else {
+            return subcategoryToUpdate;
+        }
     }
 
     @Transactional

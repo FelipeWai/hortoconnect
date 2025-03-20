@@ -13,6 +13,8 @@ public interface SubcategoryGateway {
 
     Optional<Subcategory> getSubcategoryById(Long id);
 
+    Optional<Subcategory> getSubcategoryByName(String name);
+
     Subcategory crateSubcategory(SubcategoryRequestDTO subcategory);
 
     Subcategory patchSubcategoryById(Long id, SubcategoryPatchDTO patchDTO);

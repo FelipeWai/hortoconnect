@@ -58,11 +58,11 @@ public class SubcategoryController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Subcategory> patchSubcategory(
+    public ResponseEntity<SubcategoryResponseDTO> patchSubcategory(
             @PathVariable Long id,
             @RequestBody @Valid SubcategoryPatchDTO patchDTO) {
         Subcategory updatedSubcategory = patchSubcategoryByIdCase.execute(id, patchDTO);
-        return ResponseEntity.ok(updatedSubcategory);
+        return ResponseEntity.ok(subcategoryMapper.toResponseDTO(updatedSubcategory));
     }
 
     @DeleteMapping("/{id}")
