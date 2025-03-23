@@ -26,7 +26,7 @@ public class QualityRepoGateway implements QualityGateway {
 
     @Override
     public List<Quality> getAllQualities() {
-        List<QualityEntity> entityList = qualityRepository.findAll();
+        List<QualityEntity> entityList = qualityRepository.findAllByOrderByNameAsc();
         return entityList.stream()
                 .map(qualityMapper::toDomain)
                 .collect(Collectors.toList());

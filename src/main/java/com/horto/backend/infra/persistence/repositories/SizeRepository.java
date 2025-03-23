@@ -13,5 +13,7 @@ public interface SizeRepository extends JpaRepository<SizeEntity, Integer> {
 
     List<SizeEntity> findAllByIdIn(List<Long> ids);
 
+    List<SizeEntity> findAllByOrderByNameAsc();
+
     void deleteById(Long id);
 }

@@ -26,7 +26,7 @@ public class SizeRepoGateway implements SizeGateway {
 
     @Override
     public List<Size> getAllSizes() {
-        List<SizeEntity> entityList = sizeRepository.findAll();
+        List<SizeEntity> entityList = sizeRepository.findAllByOrderByNameAsc();
         return entityList.stream()
                 .map(sizeMapper::toDomain)
                 .collect(Collectors.toList());
