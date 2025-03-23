@@ -48,4 +48,14 @@ public class SubcategoryUseCasesConfig {
         return new GetSubcategoryByNameCaseImpl(subcategoryRepoGateway);
     }
 
+    @Bean
+    public GetSubcatByCatIdCase getSubcatByCatIdCase() {
+        return new GetSubcatByCatIdCaseImpl(subcategoryRepoGateway);
+    }
+
+    @Bean
+    public GetSubcatByNameContainingCase getSubcatByNameContainingCase() {
+        return new GetSubcatByNameContainingCaseImpl(subcategoryRepoGateway);
+    }
+
 }

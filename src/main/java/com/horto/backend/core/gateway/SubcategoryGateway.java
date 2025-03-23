@@ -11,6 +11,10 @@ public interface SubcategoryGateway {
 
     List<Subcategory> getAllSubcategories();
 
+    List<Subcategory> getAllSubcategoriesByCategoryId(Long categoryId);
+
+    List<Subcategory> getSubcategoriesByNameContaining(String nameFragment);
+
     Optional<Subcategory> getSubcategoryById(Long id);
 
     Optional<Subcategory> getSubcategoryByName(String name);

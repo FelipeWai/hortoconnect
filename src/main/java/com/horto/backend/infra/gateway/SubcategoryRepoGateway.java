@@ -42,7 +42,6 @@ public class SubcategoryRepoGateway implements SubcategoryGateway {
 
     private final GetCategoryByIdCase getCategoryByIdCase;
 
-
     private final GetSizeByIdCase getSizeByIdCase;
     private final GetAllSizesByIdCase getAllSizesByIdCase;
 
@@ -60,6 +59,24 @@ public class SubcategoryRepoGateway implements SubcategoryGateway {
     @Override
     public List<Subcategory> getAllSubcategories() {
         List<SubcategoryEntity> subcategoryEntityList = subcategoryRepository.findAll();
+        return subcategoryEntityList.stream()
+                .map(subcategoryMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Subcategory> getAllSubcategoriesByCategoryId(Long categoryId) {
+        getCategoryByIdCase.execute(categoryId);
+
+        List<SubcategoryEntity> subcategoryEntityList = subcategoryRepository.findAllByCategory_Id(categoryId);
+        return subcategoryEntityList.stream()
+                .map(subcategoryMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<Subcategory> getSubcategoriesByNameContaining(String nameFragment) {
+        List<SubcategoryEntity> subcategoryEntityList = subcategoryRepository.findByNameContainingIgnoreCase(nameFragment);
         return subcategoryEntityList.stream()
                 .map(subcategoryMapper::toDomain)
                 .collect(Collectors.toList());
