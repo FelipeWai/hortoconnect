@@ -12,8 +12,10 @@ import com.horto.backend.infra.dto.product.response.ProductResponseDTO;
 import com.horto.backend.infra.mapper.ProductMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -49,9 +51,13 @@ public class ProductController {
         return ResponseEntity.ok(productMapper.toResponseDTO(product));
     }
 
-    @PostMapping
-    public ResponseEntity<ProductResponseDTO> createProduct(@RequestBody @Valid ProductRequestDTO requestDTO) {
-        Product newProduct = createProductCase.execute(requestDTO);
+    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<ProductResponseDTO> createProduct(
+            @RequestPart("data") @Valid ProductRequestDTO requestDTO,
+            @RequestPart(value = "pictures", required = false) List<MultipartFile> pictures) {
+
+        Product newProduct = createProductCase.execute(requestDTO, pictures);
+
         return ResponseEntity.ok(productMapper.toResponseDTO(newProduct));
     }
 

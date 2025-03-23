@@ -1,12 +1,14 @@
 package com.horto.backend.infra.gateway;
 
 import com.horto.backend.core.entities.Product;
+import com.horto.backend.core.entities.ProductPicture;
 import com.horto.backend.core.entities.Subcategory;
 import com.horto.backend.core.exceptions.product.ProductAlreadyExists;
 import com.horto.backend.core.exceptions.product.ProductNotFoundException;
-import com.horto.backend.core.exceptions.subcategory.SubcategoryNotFoundException;
 import com.horto.backend.core.gateway.ProductGateway;
+import com.horto.backend.core.usecases.productPicture.post.CreateProductPicturesCase;
 import com.horto.backend.core.usecases.subcategory.get.GetSubcategoryByIdCase;
+import com.horto.backend.infra.config.aws.s3.S3StorageService;
 import com.horto.backend.infra.dto.product.request.ProductPatchDTO;
 import com.horto.backend.infra.dto.product.request.ProductRequestDTO;
 import com.horto.backend.infra.mapper.ProductMapper;
@@ -16,6 +18,7 @@ import com.horto.backend.infra.persistence.entities.SubcategoryEntity;
 import com.horto.backend.infra.persistence.repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +27,10 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class ProductRepoGateway implements ProductGateway {
+
+    private final S3StorageService s3StorageService;
+
+    private final CreateProductPicturesCase createProductPicturesCase;
 
     private final GetSubcategoryByIdCase getSubcategoryByIdCase;
 
@@ -63,16 +70,29 @@ public class ProductRepoGateway implements ProductGateway {
     }
 
     @Override
-    public Product createProduct(ProductRequestDTO requestDTO) {
+    public Product createProduct(ProductRequestDTO requestDTO, List<MultipartFile> pictures) {
         String nameLowerCase = requestDTO.name().trim().toLowerCase();
         if(getProductByName(nameLowerCase).isPresent()) {
             throw new ProductAlreadyExists(nameLowerCase);
         }
+
         Subcategory subcategory = getSubcategoryByIdCase.execute(requestDTO.subcategory_id());
+
         ProductEntity productEntity = productMapper.toEntity(requestDTO);
         productEntity.setName(nameLowerCase);
         productEntity.setSubcategory(subcategoryMapper.toEntity(subcategory));
+
         ProductEntity savedEntity = productRepository.save(productEntity);
+
+        if(pictures != null) {
+            List<ProductPicture> pictureList = pictures.stream().map(picture -> {
+                String url = s3StorageService.uploadFile(picture);
+                return new ProductPicture(null, url, productMapper.toDomain(savedEntity));
+            }).toList();
+
+            createProductPicturesCase.execute(pictureList);
+        }
+
         return productMapper.toDomain(savedEntity);
     }
 
