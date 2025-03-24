@@ -6,17 +6,22 @@ import com.horto.backend.core.entities.Subcategory;
 import com.horto.backend.core.exceptions.product.ProductAlreadyExists;
 import com.horto.backend.core.exceptions.product.ProductNotFoundException;
 import com.horto.backend.core.gateway.ProductGateway;
+import com.horto.backend.core.usecases.category.get.GetCategoryByIdCase;
 import com.horto.backend.core.usecases.productPicture.post.CreateProductPicturesCase;
 import com.horto.backend.core.usecases.subcategory.get.GetSubcategoryByIdCase;
 import com.horto.backend.infra.config.aws.s3.S3StorageService;
 import com.horto.backend.infra.dto.product.request.ProductPatchDTO;
 import com.horto.backend.infra.dto.product.request.ProductRequestDTO;
+import com.horto.backend.infra.filters.product.ProductFilter;
+import com.horto.backend.infra.filters.product.ProductSpecification;
 import com.horto.backend.infra.mapper.ProductMapper;
 import com.horto.backend.infra.mapper.SubcategoryMapper;
 import com.horto.backend.infra.persistence.entities.ProductEntity;
 import com.horto.backend.infra.persistence.entities.SubcategoryEntity;
 import com.horto.backend.infra.persistence.repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,14 +43,22 @@ public class ProductRepoGateway implements ProductGateway {
 
     private final ProductMapper productMapper;
     private final SubcategoryMapper subcategoryMapper;
+    private final GetCategoryByIdCase getCategoryByIdCase;
 
 
     @Override
-    public List<Product> getAllProducts() {
-        List<ProductEntity> entityList = productRepository.findAll();
-        return entityList.stream()
-                .map(productMapper::toDomain)
-                .collect(Collectors.toList());
+    public Page<Product> getAllProducts(ProductFilter filter, Pageable pageable) {
+        if(filter.getCategory_id() != null){
+            getCategoryByIdCase.execute(filter.getCategory_id());
+        }
+        if(filter.getSubcategory_id() != null){
+            getSubcategoryByIdCase.execute(filter.getSubcategory_id());
+        }
+
+        ProductSpecification productSpecification = new ProductSpecification(filter);
+        Page<ProductEntity> productEntities = productRepository.findAll(productSpecification, pageable);
+
+        return productEntities.map(productMapper::toDomain);
     }
 
     @Override
@@ -58,13 +71,6 @@ public class ProductRepoGateway implements ProductGateway {
         return Optional.empty();
     }
 
-    @Override
-    public List<Product> getAllProductsByNameContaining(String namePart) {
-        List<ProductEntity> productEntityList = productRepository.findByNameContainingIgnoreCase(namePart);
-        return productEntityList.stream()
-                .map(productMapper::toDomain)
-                .collect(Collectors.toList());
-    }
 
     @Override
     public Optional<Product> getProductByName(String name) {
