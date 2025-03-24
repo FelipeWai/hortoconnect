@@ -29,10 +29,13 @@ public class UserRepoGateway implements UserGateway {
     @Override
     public Optional<User> getUserByEmail(String email) {
         Optional<UserEntity> userEntityOptional = userRepository.findByEmail(email);
-        if (userEntityOptional.isPresent()) {
-            return Optional.of(userMapper.toDomain(userEntityOptional.get()));
-        }
-        return Optional.empty();
+        return userEntityOptional.map(userMapper::toDomain);
+    }
+
+    @Override
+    public Optional<User> getUserById(Long id) {
+        Optional<UserEntity> userEntityOptional = userRepository.findById(id);
+        return userEntityOptional.map(userMapper::toDomain);
     }
 
     @Override

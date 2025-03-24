@@ -52,6 +52,9 @@ public class UserEntity implements UserDetails {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FavoritesEntity> favorites;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

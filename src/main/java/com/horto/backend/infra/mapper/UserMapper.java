@@ -10,6 +10,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
+    UserEntity toEntity(User user);
     UserEntity toEntity(RegisterRequestDTO registerRequestDTO);
 
     User toDomain(UserEntity entity);

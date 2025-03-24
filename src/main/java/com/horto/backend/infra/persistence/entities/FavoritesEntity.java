@@ -1,7 +1,5 @@
 package com.horto.backend.infra.persistence.entities;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,30 +9,30 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "favorites")
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
-@Entity
-@Table(name = "product_picture")
-public class ProductPictureEntity {
+public class FavoritesEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "url", nullable = false, unique = true)
-    private String url;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private UserEntity user;
 
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
     private ProductEntity product;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
-
 }

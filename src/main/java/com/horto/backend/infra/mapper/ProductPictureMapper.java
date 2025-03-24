@@ -6,7 +6,6 @@ import com.horto.backend.infra.dto.productPicture.response.ProductPictureRespons
 import com.horto.backend.infra.persistence.entities.ProductPictureEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
 
 @Mapper(componentModel = "spring")
 public interface ProductPictureMapper {

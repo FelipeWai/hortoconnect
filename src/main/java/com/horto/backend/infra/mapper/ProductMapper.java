@@ -12,6 +12,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
 
+    // Mapeamento de fotos para evitar recursão infinta
     @Mapping(target = "product", ignore = true)
     ProductPicture toDomain(ProductPictureEntity entity);
 

@@ -6,6 +6,7 @@ import com.horto.backend.core.usecases.user.post.RegisterUserCaseImpl;
 import com.horto.backend.infra.gateway.UserRepoGateway;
 import com.horto.backend.infra.persistence.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.mapstruct.Named;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -41,4 +42,8 @@ public class UserUseCasesConfig {
         return new GetUserByUsernameCaseImpl(userRepoGateway);
     }
 
+    @Bean
+    public GetUserByIdCase getUserByIdCase() {
+        return new GetUserByIdCaseImpl(userRepoGateway);
+    }
 }

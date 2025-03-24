@@ -6,10 +6,7 @@ import com.horto.backend.core.exceptions.user.alreadyExists.CnpjAlreadyExistsExc
 import com.horto.backend.core.exceptions.user.alreadyExists.EmailAlreadyExistsException;
 import com.horto.backend.core.exceptions.user.alreadyExists.PhoneAlreadyExistsException;
 import com.horto.backend.core.exceptions.user.alreadyExists.UsernameAlreadyExistsException;
-import com.horto.backend.core.exceptions.user.notFound.CnpjNotFoundException;
-import com.horto.backend.core.exceptions.user.notFound.EmailNotFoundException;
-import com.horto.backend.core.exceptions.user.notFound.PhoneNotFoundException;
-import com.horto.backend.core.exceptions.user.notFound.UsernameNotFoundException;
+import com.horto.backend.core.exceptions.user.notFound.*;
 import com.horto.backend.infra.exception.global.GlobalExceptionHandler;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +15,15 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class UserExceptionHandler {
+
+    @ExceptionHandler(UserNotFoundByIdException.class)
+    public ResponseEntity<GlobalExceptionHandler.ErrorResponse> handleCategoryNotFoundException(UserNotFoundByIdException ex) {
+        GlobalExceptionHandler.ErrorResponse error = new GlobalExceptionHandler.ErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
 
     @ExceptionHandler(EmailNotFoundException.class)
     public ResponseEntity<GlobalExceptionHandler.ErrorResponse> handleCategoryNotFoundException(EmailNotFoundException ex) {
