@@ -12,6 +12,8 @@ public interface ProductGateway {
 
     List<Product> getAllProducts();
 
+    List<Product> getAllProductsByNameContaining(String namePart);
+
     Optional<Product> getProductById(Long id);
 
     Optional<Product> getProductByName(String name);

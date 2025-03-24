@@ -48,4 +48,9 @@ public class ProductUseCasesConfig {
         return new PatchProductByIdCaseImpl(productRepoGateway);
     }
 
+    @Bean
+    public AllProductsByNameContainingCase allProductsByNameContainingCase() {
+        return new AllProductsByNameContainingCaseImpl(productRepoGateway);
+    }
+
 }

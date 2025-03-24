@@ -59,6 +59,14 @@ public class ProductRepoGateway implements ProductGateway {
     }
 
     @Override
+    public List<Product> getAllProductsByNameContaining(String namePart) {
+        List<ProductEntity> productEntityList = productRepository.findByNameContainingIgnoreCase(namePart);
+        return productEntityList.stream()
+                .map(productMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public Optional<Product> getProductByName(String name) {
         String nameLowerCase = name.trim().toLowerCase();
         Optional<ProductEntity> product = productRepository.findByName(nameLowerCase);

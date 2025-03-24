@@ -2,6 +2,7 @@ package com.horto.backend.infra.presentation;
 
 import com.horto.backend.core.entities.Product;
 import com.horto.backend.core.usecases.product.delete.DeleteProductByIdCase;
+import com.horto.backend.core.usecases.product.get.AllProductsByNameContainingCase;
 import com.horto.backend.core.usecases.product.get.GetAllProductsCase;
 import com.horto.backend.core.usecases.product.get.GetProductByIdCase;
 import com.horto.backend.core.usecases.product.patch.PatchProductByIdCase;
@@ -29,6 +30,7 @@ public class ProductController {
     private final DeleteProductByIdCase deleteProductByIdCase;
 
     private final GetAllProductsCase getAllProductsCase;
+    private final AllProductsByNameContainingCase allProductsByNameContainingCase;
     private final GetProductByIdCase getProductByIdCase;
 
     private final CreateProductCase createProductCase;
@@ -37,12 +39,20 @@ public class ProductController {
 
 
     @GetMapping
-    public ResponseEntity<List<ProductResponseDTO>> getAllProducts() {
-        List<Product> products = getAllProductsCase.execute();
-        return ResponseEntity.ok(products.stream()
+    public ResponseEntity<List<ProductResponseDTO>> getAllProducts(
+            @RequestParam(required = false) String name
+    ) {
+        if(name == null) {
+            List<Product> products = getAllProductsCase.execute();
+            return ResponseEntity.ok(products.stream()
+                    .map(productMapper::toResponseDTO)
+                    .toList()
+            );
+        }
+        List<Product> productsByName = allProductsByNameContainingCase.execute(name);
+        return ResponseEntity.ok(productsByName.stream()
                 .map(productMapper::toResponseDTO)
-                .toList()
-        );
+                .toList());
     }
 
     @GetMapping("/{id}")
