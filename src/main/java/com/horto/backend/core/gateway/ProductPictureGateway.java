@@ -8,4 +8,6 @@ public interface ProductPictureGateway {
 
     List<ProductPicture> createProductPictures(List<ProductPicture> productPictures);
 
+    List<ProductPicture> getProductPictureByProductId(Long productId);
+
 }

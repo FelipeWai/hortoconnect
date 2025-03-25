@@ -7,6 +7,7 @@ import com.horto.backend.core.exceptions.product.ProductAlreadyExists;
 import com.horto.backend.core.exceptions.product.ProductNotFoundException;
 import com.horto.backend.core.gateway.ProductGateway;
 import com.horto.backend.core.usecases.category.get.GetCategoryByIdCase;
+import com.horto.backend.core.usecases.productPicture.get.GetProductPicturesByProductIdCase;
 import com.horto.backend.core.usecases.productPicture.post.CreateProductPicturesCase;
 import com.horto.backend.core.usecases.subcategory.get.GetSubcategoryByIdCase;
 import com.horto.backend.infra.config.aws.s3.ImageOptimizationService;
@@ -19,6 +20,7 @@ import com.horto.backend.infra.mapper.ProductMapper;
 import com.horto.backend.infra.mapper.SubcategoryMapper;
 import com.horto.backend.infra.persistence.entities.ProductEntity;
 import com.horto.backend.infra.persistence.entities.SubcategoryEntity;
+import com.horto.backend.infra.persistence.repositories.ProductPictureRepository;
 import com.horto.backend.infra.persistence.repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -39,10 +41,12 @@ public class ProductRepoGateway implements ProductGateway {
     private final ImageOptimizationService imageOptimizationService;
 
     private final CreateProductPicturesCase createProductPicturesCase;
+    private final GetProductPicturesByProductIdCase getProductPicturesByProductIdCase;
 
     private final GetSubcategoryByIdCase getSubcategoryByIdCase;
 
     private final ProductRepository productRepository;
+    private final ProductPictureRepository productPictureRepository;
 
     private final ProductMapper productMapper;
     private final SubcategoryMapper subcategoryMapper;
@@ -115,9 +119,6 @@ public class ProductRepoGateway implements ProductGateway {
                 } catch (IOException e) {
                     throw new RuntimeException("Erro ao otimizar imagem", e);
                 }
-
-//                String url = s3StorageService.uploadFile(picture);
-//                return new ProductPicture(null, url, productMapper.toDomain(savedEntity));
             }).toList();
 
             createProductPicturesCase.execute(pictureList);
@@ -128,7 +129,12 @@ public class ProductRepoGateway implements ProductGateway {
 
     @Override
     public void deleteProductById(Long id) {
-        if(getProductById(id).isPresent()) {
+        if(productRepository.existsById(id)) {
+            List<ProductPicture> pictureList = getProductPicturesByProductIdCase.execute(id);
+            for(ProductPicture picture : pictureList) {
+                s3StorageService.deleteFile(picture.url());
+                productPictureRepository.deleteById(picture.id());
+            }
             productRepository.deleteById(id);
         }else{
             throw new ProductNotFoundException(id.toString());
