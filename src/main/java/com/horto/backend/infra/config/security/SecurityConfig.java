@@ -40,6 +40,22 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
 
+                        .requestMatchers(HttpMethod.POST, "/product").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/product/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/product/**").hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.POST, "/quality").hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.POST, "/size").hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.POST, "/subcategory").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/subcategory/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/subcategory/**").hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.POST, "/category").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/category/**").hasRole("ADMIN")
+
+
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception.accessDeniedHandler(accessDeniedHandler))
