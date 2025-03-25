@@ -48,11 +48,9 @@ public class ProductController {
             @RequestParam(required = false) Long subcategory_id,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(required = false) String name,
-            @RequestParam(defaultValue = "name") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortDirection
+            @RequestParam(required = false) String name
     ) {
-        Sort sort = Sort.by(sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sortBy);
+        Sort sort = Sort.by(Sort.Direction.ASC, "name");
         Pageable pageable = PageRequest.of(page, size, sort);
 
         ProductFilter productFilter = new ProductFilter();

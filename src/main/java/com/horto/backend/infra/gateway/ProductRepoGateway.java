@@ -9,6 +9,7 @@ import com.horto.backend.core.gateway.ProductGateway;
 import com.horto.backend.core.usecases.category.get.GetCategoryByIdCase;
 import com.horto.backend.core.usecases.productPicture.post.CreateProductPicturesCase;
 import com.horto.backend.core.usecases.subcategory.get.GetSubcategoryByIdCase;
+import com.horto.backend.infra.config.aws.s3.ImageOptimizationService;
 import com.horto.backend.infra.config.aws.s3.S3StorageService;
 import com.horto.backend.infra.dto.product.request.ProductPatchDTO;
 import com.horto.backend.infra.dto.product.request.ProductRequestDTO;
@@ -25,15 +26,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
 public class ProductRepoGateway implements ProductGateway {
 
     private final S3StorageService s3StorageService;
+
+    private final ImageOptimizationService imageOptimizationService;
 
     private final CreateProductPicturesCase createProductPicturesCase;
 
@@ -100,8 +103,21 @@ public class ProductRepoGateway implements ProductGateway {
 
         if(pictures != null) {
             List<ProductPicture> pictureList = pictures.stream().map(picture -> {
-                String url = s3StorageService.uploadFile(picture);
-                return new ProductPicture(null, url, productMapper.toDomain(savedEntity));
+
+                try {
+
+                    byte[] optimizedImage = imageOptimizationService.optimizeImage(picture);
+                    MultipartFile optimizedFile = imageOptimizationService.convertToMultipartFile(optimizedImage, picture.getOriginalFilename());
+
+                    String url = s3StorageService.uploadFile(optimizedFile);
+
+                    return new ProductPicture(null, url, productMapper.toDomain(savedEntity));
+                } catch (IOException e) {
+                    throw new RuntimeException("Erro ao otimizar imagem", e);
+                }
+
+//                String url = s3StorageService.uploadFile(picture);
+//                return new ProductPicture(null, url, productMapper.toDomain(savedEntity));
             }).toList();
 
             createProductPicturesCase.execute(pictureList);
