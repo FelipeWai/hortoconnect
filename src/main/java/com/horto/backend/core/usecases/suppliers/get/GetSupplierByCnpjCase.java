@@ -1,0 +1,9 @@
+package com.horto.backend.core.usecases.suppliers.get;
+
+import com.horto.backend.core.entities.Supplier;
+
+public interface GetSupplierByCnpjCase {
+
+    Supplier execute(String cnpj);
+
+}

@@ -1,0 +1,1 @@
+ALTER TABLE suppliers RENAME COLUMN sale_phone TO sales_phone;
