@@ -1,11 +1,12 @@
 package com.horto.backend.core.usecases.suppliers.get;
 
 import com.horto.backend.core.entities.Supplier;
-
-import java.util.List;
+import com.horto.backend.infra.filters.supplier.SupplierFilter;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface GetAllSuppliersCase {
 
-    List<Supplier> execute();
+    Page<Supplier> execute(SupplierFilter supplierFilter, Pageable pageable);
 
 }

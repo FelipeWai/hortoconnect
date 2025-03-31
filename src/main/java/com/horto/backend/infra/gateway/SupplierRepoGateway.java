@@ -7,15 +7,18 @@ import com.horto.backend.core.exceptions.user.alreadyExists.CnpjAlreadyExistsExc
 import com.horto.backend.core.gateway.SupplierGateway;
 import com.horto.backend.infra.dto.supplier.request.SupplierPatchDTO;
 import com.horto.backend.infra.dto.supplier.request.SupplierRequestDTO;
+import com.horto.backend.infra.filters.supplier.SupplierFilter;
+import com.horto.backend.infra.filters.supplier.SupplierSpecification;
 import com.horto.backend.infra.mapper.SupplierMapper;
 import com.horto.backend.infra.persistence.entities.SupplierEntity;
 import com.horto.backend.infra.persistence.repositories.SupplierRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -26,11 +29,10 @@ public class SupplierRepoGateway implements SupplierGateway {
     private final SupplierMapper supplierMapper;
 
     @Override
-    public List<Supplier> getAllSuppliers() {
-        List<SupplierEntity> supplierEntities = supplierRepository.findAll();
-        return supplierEntities.stream()
-                .map(supplierMapper::toDomain)
-                .collect(Collectors.toList());
+    public Page<Supplier> getAllSuppliers(SupplierFilter supplierFilter, Pageable pageable) {
+        Specification<SupplierEntity> specification = new SupplierSpecification(supplierFilter);
+        Page<SupplierEntity> supplierEntities = supplierRepository.findAll(specification, pageable);
+        return supplierEntities.map(supplierMapper::toDomain);
     }
 
     @Override

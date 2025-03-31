@@ -6,12 +6,18 @@ import com.horto.backend.core.usecases.suppliers.get.GetAllSuppliersCase;
 import com.horto.backend.core.usecases.suppliers.get.GetSupplierByIdCase;
 import com.horto.backend.core.usecases.suppliers.patch.PatchSupplierCase;
 import com.horto.backend.core.usecases.suppliers.post.CreateSupplierCase;
+import com.horto.backend.infra.dto.page.PageResponseDTO;
 import com.horto.backend.infra.dto.supplier.request.SupplierPatchDTO;
 import com.horto.backend.infra.dto.supplier.request.SupplierRequestDTO;
 import com.horto.backend.infra.dto.supplier.response.SupplierResponseDTO;
+import com.horto.backend.infra.filters.supplier.SupplierFilter;
 import com.horto.backend.infra.mapper.SupplierMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,13 +40,32 @@ public class SupplierController {
 
     private final SupplierMapper supplierMapper;
 
+
     @GetMapping
-    public ResponseEntity<List<SupplierResponseDTO>> getAllSuppliers() {
-        List<Supplier> allSuppliers = getAllSuppliersCase.execute();
-        return ResponseEntity.ok(allSuppliers.stream()
+    public ResponseEntity<PageResponseDTO<SupplierResponseDTO>> getAllSuppliers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false) String name
+    ) {
+        Sort sort = Sort.by(Sort.Direction.ASC, "name");
+        Pageable pageable = PageRequest.of(page, 20, sort);
+
+        SupplierFilter supplierFilter = new SupplierFilter();
+        supplierFilter.setName(name);
+
+        Page<Supplier> supplierPage = getAllSuppliersCase.execute(supplierFilter, pageable);
+
+        List<SupplierResponseDTO> supplierResponseDTOList = supplierPage.stream()
                 .map(supplierMapper::toResponseDTO)
-                .toList()
+                .toList();
+
+        PageResponseDTO<SupplierResponseDTO> response = new PageResponseDTO<>(
+                supplierResponseDTOList,
+                supplierPage.getNumber(),
+                supplierPage.getTotalElements(),
+                supplierPage.getTotalPages()
         );
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
