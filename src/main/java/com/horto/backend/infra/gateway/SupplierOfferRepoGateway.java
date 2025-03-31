@@ -2,12 +2,14 @@ package com.horto.backend.infra.gateway;
 
 import com.horto.backend.core.entities.*;
 import com.horto.backend.core.exceptions.supplierOffer.OffersNotFoundException;
+import com.horto.backend.core.exceptions.supplierOffer.OneOfferNotFoundException;
 import com.horto.backend.core.gateway.SupplierOfferGateway;
 import com.horto.backend.core.usecases.product.get.GetProductByIdCase;
 import com.horto.backend.core.usecases.quality.get.GetQualityByIdCase;
 import com.horto.backend.core.usecases.size.get.GetSizeByIdCase;
 import com.horto.backend.core.usecases.suppliers.get.GetSupplierByIdCase;
 import com.horto.backend.infra.dto.supplier.response.SupplierNameDTO;
+import com.horto.backend.infra.dto.supplierOffer.request.SupplierOfferPatchDTO;
 import com.horto.backend.infra.dto.supplierOffer.request.SupplierOfferRequestDTO;
 import com.horto.backend.infra.dto.supplierOffer.response.PriceRangeDTO;
 import com.horto.backend.infra.dto.supplierOffer.response.SupplierOffersSummaryDTO;
@@ -59,6 +61,17 @@ public class SupplierOfferRepoGateway implements SupplierOfferGateway {
         Set<Quality> productQualities = new HashSet<>(product.subcategory().qualities());
         if(!productSizes.contains(size) || !productQualities.contains(quality)) {
             throw new IllegalArgumentException("Tamanho ou qualidade não disponível para o produto selecionado");
+        }
+
+        Optional<SupplierOfferEntity> existingOffer = supplierOfferRepository.findBySupplierAndProductAndSizeAndQualityIds(
+                supplier.id(),
+                product.id(),
+                size.id(),
+                quality.id()
+        );
+
+        if(existingOffer.isPresent()) {
+            throw new IllegalStateException("Já existe uma oferta deste fornecedor para este produto com o mesmo tamanho e qualidade");
         }
 
         SupplierOfferEntity supplierOfferEntity = supplierOfferMapper.toEntity(requestDTO);
@@ -128,5 +141,57 @@ public class SupplierOfferRepoGateway implements SupplierOfferGateway {
                     );
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<SupplierOffer> getOffersByProductAndSupplierId(Long productId, Long supplierId) {
+        getProductByIdCase.execute(productId);
+        getSupplierByIdCase.execute(supplierId);
+        List<SupplierOfferEntity> offersList = supplierOfferRepository.findAllByProduct_IdAndSupplier_Id(productId, supplierId);
+        return offersList.stream()
+                .map(supplierOfferMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public void deleteOfferById(Long id) {
+        if(getOfferById(id).isEmpty()){
+            throw new OneOfferNotFoundException(id.toString());
+        }
+        supplierOfferRepository.deleteById(id);
+    }
+
+    @Override
+    public Optional<SupplierOffer> getOfferById(Long id) {
+        Optional<SupplierOfferEntity> offer = supplierOfferRepository.findById(id);
+        return offer.map(supplierOfferMapper::toDomain);
+    }
+
+    @Override
+    public SupplierOffer patchOfferById(Long id, SupplierOfferPatchDTO patchDTO) {
+        SupplierOfferEntity entityToUpdate = supplierOfferRepository.findById(id)
+                .orElseThrow(() -> new OneOfferNotFoundException(id.toString()));
+
+        patchDTO.minPrice().ifPresent(minPrice -> {
+            if (!minPrice.equals(entityToUpdate.getMinPrice())) {
+                entityToUpdate.setMinPrice(minPrice);
+            }
+        });
+
+        patchDTO.maxPrice().ifPresent(maxPrice -> {
+            if (!maxPrice.equals(entityToUpdate.getMaxPrice())) {
+                entityToUpdate.setMaxPrice(maxPrice);
+            }
+        });
+
+        if (entityToUpdate.getMinPrice() != null && entityToUpdate.getMaxPrice() != null) {
+            if (entityToUpdate.getMinPrice() > entityToUpdate.getMaxPrice()) {
+                throw new IllegalArgumentException("O preço mínimo não pode ser maior que o preço máximo");
+            }
+        }
+
+        SupplierOfferEntity updatedEntity = supplierOfferRepository.save(entityToUpdate);
+
+        return supplierOfferMapper.toDomain(updatedEntity);
     }
 }

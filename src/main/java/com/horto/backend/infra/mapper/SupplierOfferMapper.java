@@ -4,12 +4,16 @@ import com.horto.backend.core.entities.Product;
 import com.horto.backend.core.entities.ProductPicture;
 import com.horto.backend.core.entities.SupplierOffer;
 import com.horto.backend.infra.dto.product.response.ProductNameResponseDTO;
+import com.horto.backend.infra.dto.supplierOffer.request.SupplierOfferPatchDTO;
 import com.horto.backend.infra.dto.supplierOffer.request.SupplierOfferRequestDTO;
 import com.horto.backend.infra.dto.supplierOffer.response.SupplierOfferResponseDTO;
 import com.horto.backend.infra.persistence.entities.ProductPictureEntity;
 import com.horto.backend.infra.persistence.entities.SupplierOfferEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
+
+import java.util.Optional;
 
 @Mapper(componentModel = "spring")
 public interface SupplierOfferMapper {
@@ -21,6 +25,7 @@ public interface SupplierOfferMapper {
     SupplierOffer toDomain(SupplierOfferEntity entity);
 
     SupplierOfferEntity toEntity(SupplierOffer domain);
+
     SupplierOfferEntity toEntity(SupplierOfferRequestDTO request);
 
     SupplierOfferResponseDTO toResponseDTO(SupplierOffer domain);
