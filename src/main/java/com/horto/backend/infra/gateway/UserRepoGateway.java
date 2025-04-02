@@ -7,6 +7,7 @@ import com.horto.backend.core.exceptions.user.alreadyExists.EmailAlreadyExistsEx
 import com.horto.backend.core.exceptions.user.alreadyExists.PhoneAlreadyExistsException;
 import com.horto.backend.core.exceptions.user.alreadyExists.UsernameAlreadyExistsException;
 import com.horto.backend.core.gateway.UserGateway;
+import com.horto.backend.infra.dto.resetPassword.request.NewPasswordDTO;
 import com.horto.backend.infra.dto.user.request.RegisterRequestDTO;
 import com.horto.backend.infra.mapper.UserMapper;
 import com.horto.backend.infra.persistence.entities.UserEntity;
@@ -101,4 +102,5 @@ public class UserRepoGateway implements UserGateway {
         UserEntity savedEntity = userRepository.save(entity);
         return userMapper.toDomain(savedEntity);
     }
+
 }

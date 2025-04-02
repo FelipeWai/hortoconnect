@@ -3,10 +3,10 @@ package com.horto.backend.infra.config.usecases;
 import com.horto.backend.core.usecases.user.get.*;
 import com.horto.backend.core.usecases.user.post.RegisterUserCase;
 import com.horto.backend.core.usecases.user.post.RegisterUserCaseImpl;
+import com.horto.backend.core.usecases.resetPasswordToken.post.ResetUserPasswordCase;
+import com.horto.backend.core.usecases.resetPasswordToken.post.ResetUserPasswordCaseImpl;
 import com.horto.backend.infra.gateway.UserRepoGateway;
-import com.horto.backend.infra.persistence.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.mapstruct.Named;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

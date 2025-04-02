@@ -19,3 +19,13 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: hortoconnect@gmail.com
+    password: rdyz zldu kvgp gwun
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true

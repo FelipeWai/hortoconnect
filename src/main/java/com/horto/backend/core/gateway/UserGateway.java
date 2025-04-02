@@ -1,6 +1,8 @@
 package com.horto.backend.core.gateway;
 
 import com.horto.backend.core.entities.User;
+import com.horto.backend.infra.dto.resetPassword.request.NewPasswordDTO;
+import com.horto.backend.infra.dto.resetPassword.request.ResetPasswordRequestDTO;
 import com.horto.backend.infra.dto.user.request.RegisterRequestDTO;
 
 import java.util.Optional;

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Redefinição de Senha</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 500px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header, .footer {
+            background-color: #369c51;
+            position: relative;
+        }
+        .header {
+            height: 150px;
+            border-bottom-left-radius: 50% 30px;
+            border-bottom-right-radius: 50% 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .logo-container {
+            width: 100%;
+            text-align: center;
+        }
+        .header img {
+            max-height: 120px;
+            max-width: 90%;
+            display: inline-block;
+        }
+        .footer {
+            height: 100px;
+            border-top-left-radius: 50% 30px;
+            border-top-right-radius: 50% 30px;
+        }
+        .content {
+            padding: 20px;
+        }
+        .username {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .text {
+            font-size: 18px;
+        }
+        .code {
+            font-size: 32px;
+            font-weight: bold;
+            color: #005216;
+            margin: 30px 0;
+            text-align: center;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="logo-container">
+            <img src="https://horto-s3-dev.s3.us-east-2.amazonaws.com/Logo-Hort.png" alt="Logo">
+        </div>
+    </div>
+    <div class="content">
+        <p class="username" th:text="${username}">admin</p>
+        <p class="text">Aqui está seu código</p>
+        <p class="code" th:text="${token}">156011</p>
+        <p class="text">Caso não tenha solicitado trocar sua senha apenas ignore este email</p>
+    </div>
+    <div class="footer"></div>
+</div>
+</body>
+</html>

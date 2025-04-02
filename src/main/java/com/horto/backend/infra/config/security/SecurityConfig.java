@@ -40,6 +40,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
 
+
+                        .requestMatchers(HttpMethod.POST, "/reset-password/request").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/reset-password/verify").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/reset-password/new-password").permitAll()
+
                         .requestMatchers(HttpMethod.POST, "/product").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/product/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/product/**").hasRole("ADMIN")
@@ -75,7 +80,8 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:5173",
                 "http://127.0.0.1:5173",
-                "https://planilha-horto.vercel.app"
+                "https://planilha-horto.vercel.app",
+                "https://main.d1fkyt0142pwdw.amplifyapp.com/"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(Collections.singletonList("*"));
