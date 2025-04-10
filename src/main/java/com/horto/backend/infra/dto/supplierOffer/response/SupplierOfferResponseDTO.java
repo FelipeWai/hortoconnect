@@ -7,8 +7,6 @@ import com.horto.backend.infra.dto.supplier.response.SupplierResponseDTO;
 
 public record SupplierOfferResponseDTO(
         Long id,
-        ProductNameResponseDTO product,
-        SupplierResponseDTO supplier,
         QualityResponseDTO quality,
         SizeResponseDTO size,
         Double minPrice,

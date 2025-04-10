@@ -21,6 +21,8 @@ public interface ProductMapper {
 
     ProductResponseDTO toResponseDTO(Product product);
 
+    ProductNameResponseDTO toNameResponseDTO(Product product);
+
     ProductEntity toEntity(Product product);
     ProductEntity toEntity(ProductRequestDTO productRequestDTO);
 }

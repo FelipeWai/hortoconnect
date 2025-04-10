@@ -11,7 +11,10 @@ import com.horto.backend.core.usecases.supplierOffer.post.CreateOfferCase;
 import com.horto.backend.infra.dto.supplierOffer.request.SupplierOfferPatchDTO;
 import com.horto.backend.infra.dto.supplierOffer.request.SupplierOfferRequestDTO;
 import com.horto.backend.infra.dto.supplierOffer.response.SupplierOfferResponseDTO;
+import com.horto.backend.infra.dto.supplierOffer.response.SupplierOffersGroupedResponseDTO;
 import com.horto.backend.infra.dto.supplierOffer.response.SupplierOffersSummaryDTO;
+import com.horto.backend.infra.mapper.ProductMapper;
+import com.horto.backend.infra.mapper.SupplierMapper;
 import com.horto.backend.infra.mapper.SupplierOfferMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +40,8 @@ public class SupplierOfferController {
     private final GetOffersBySupplierIdCase getOffersBySupplierIdCase;
 
     private final SupplierOfferMapper supplierOfferMapper;
+    private final ProductMapper productMapper;
+    private final SupplierMapper supplierMapper;
 
 
     @GetMapping("/{id}")
@@ -54,13 +59,23 @@ public class SupplierOfferController {
         );
     }
 
-    @GetMapping("/product/{productId}/supplier/{supplierId}")
-    public ResponseEntity<List<SupplierOfferResponseDTO>> getOffersByProductId(@PathVariable Long productId, @PathVariable Long supplierId) {
+    @GetMapping("/product/{productId}/supplier/{supplierId}/offers")
+    public ResponseEntity<SupplierOffersGroupedResponseDTO> getOffersByProductId(@PathVariable Long productId, @PathVariable Long supplierId) {
         List<SupplierOffer> offerList = getOffersByProductAndSupplierCase.execute(productId, supplierId);
-        return ResponseEntity.ok(offerList.stream()
-                .map(supplierOfferMapper::toResponseDTO)
-                .toList()
-        );
+
+        if (offerList.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        SupplierOffer first = offerList.get(0);
+
+        return ResponseEntity.ok(new SupplierOffersGroupedResponseDTO(
+                productMapper.toNameResponseDTO(first.product()),
+                supplierMapper.toResponseDTO(first.supplier()),
+                offerList.stream()
+                        .map(supplierOfferMapper::toResponseDTO)
+                        .toList()
+        ));
     }
 
     @GetMapping("/product/{productId}/suppliers")
