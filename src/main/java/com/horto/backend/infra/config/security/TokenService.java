@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 @Component
@@ -26,7 +27,7 @@ public class TokenService {
                 .withClaim("id", user.getId())
                 .withClaim("username", user.getUsername())
                 .withClaim("role", user.getRole().toString())
-                .withExpiresAt(Instant.now().plusSeconds(86400))
+                .withExpiresAt(Instant.now().plus(1, ChronoUnit.DAYS))
                 .withIssuedAt(Instant.now())
                 .withIssuer("Hortoconnect")
                 .sign(algorithm);
@@ -57,6 +58,27 @@ public class TokenService {
             return Optional.empty();
         }
     }
+
+    public String getEmailFromToken(String token) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(jwtConfig.getSecret());
+
+            DecodedJWT jwt = JWT.require(algorithm)
+                    .withIssuer("Hortoconnect")
+                    .build()
+                    .verify(token);
+
+            if (!jwt.getIssuer().equals("Hortoconnect")) {
+                throw new JWTVerificationException("Token inválido");
+            }
+
+            return jwt.getSubject();
+
+        } catch (JWTVerificationException e) {
+            return null;
+        }
+    }
+
 
     public String getRoleFromToken(String token) {
         try {

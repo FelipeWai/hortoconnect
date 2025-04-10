@@ -45,6 +45,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/reset-password/verify").permitAll()
                         .requestMatchers(HttpMethod.POST, "/reset-password/new-password").permitAll()
 
+                        .requestMatchers(HttpMethod.POST, "/webhook").permitAll()
+
                         .requestMatchers(HttpMethod.POST, "/product").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/product/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/product/**").hasRole("ADMIN")
