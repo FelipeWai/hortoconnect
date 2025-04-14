@@ -1,9 +1,7 @@
 package com.horto.backend.core.usecases.supplierOffer.get;
 
-import com.horto.backend.core.entities.SupplierOffer;
-
-import java.util.List;
+import com.horto.backend.infra.dto.supplierOffer.response.SupplierOffersGroupedResponseDTO;
 
 public interface GetOffersByProductAndSupplierCase {
-    List<SupplierOffer> execute(Long productId, Long supplierId);
+    SupplierOffersGroupedResponseDTO execute(Long productId, Long supplierId);
 }

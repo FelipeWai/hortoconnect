@@ -1,6 +1,9 @@
 package com.horto.backend.infra.presentation;
 
+import com.horto.backend.core.entities.Product;
+import com.horto.backend.core.entities.Supplier;
 import com.horto.backend.core.entities.SupplierOffer;
+import com.horto.backend.core.usecases.product.get.GetProductByIdCase;
 import com.horto.backend.core.usecases.supplierOffer.delete.DeleteOfferByIdCase;
 import com.horto.backend.core.usecases.supplierOffer.get.GetOfferByIdCase;
 import com.horto.backend.core.usecases.supplierOffer.get.GetOffersByProductAndSupplierCase;
@@ -8,6 +11,7 @@ import com.horto.backend.core.usecases.supplierOffer.get.GetOffersByProductCase;
 import com.horto.backend.core.usecases.supplierOffer.get.GetOffersBySupplierIdCase;
 import com.horto.backend.core.usecases.supplierOffer.patch.PatchOfferByIdCase;
 import com.horto.backend.core.usecases.supplierOffer.post.CreateOfferCase;
+import com.horto.backend.core.usecases.suppliers.get.GetSupplierByIdCase;
 import com.horto.backend.infra.dto.supplierOffer.request.SupplierOfferPatchDTO;
 import com.horto.backend.infra.dto.supplierOffer.request.SupplierOfferRequestDTO;
 import com.horto.backend.infra.dto.supplierOffer.response.SupplierOfferResponseDTO;
@@ -33,6 +37,9 @@ public class SupplierOfferController {
     private final DeleteOfferByIdCase deleteOfferByIdCase;
 
     private final PatchOfferByIdCase patchOfferByIdCase;
+
+    private final GetProductByIdCase getProductByIdCase;
+    private final GetSupplierByIdCase getSupplierByIdCase;
 
     private final GetOffersByProductCase getOffersByProductCase;
     private final GetOfferByIdCase getOfferByIdCase;
@@ -61,21 +68,8 @@ public class SupplierOfferController {
 
     @GetMapping("/product/{productId}/supplier/{supplierId}/offers")
     public ResponseEntity<SupplierOffersGroupedResponseDTO> getOffersByProductId(@PathVariable Long productId, @PathVariable Long supplierId) {
-        List<SupplierOffer> offerList = getOffersByProductAndSupplierCase.execute(productId, supplierId);
-
-        if (offerList.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-
-        SupplierOffer first = offerList.get(0);
-
-        return ResponseEntity.ok(new SupplierOffersGroupedResponseDTO(
-                productMapper.toNameResponseDTO(first.product()),
-                supplierMapper.toResponseDTO(first.supplier()),
-                offerList.stream()
-                        .map(supplierOfferMapper::toResponseDTO)
-                        .toList()
-        ));
+        SupplierOffersGroupedResponseDTO offerList = getOffersByProductAndSupplierCase.execute(productId, supplierId);
+        return ResponseEntity.ok(offerList);
     }
 
     @GetMapping("/product/{productId}/suppliers")

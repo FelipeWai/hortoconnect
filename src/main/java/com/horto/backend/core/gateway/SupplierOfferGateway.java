@@ -4,6 +4,7 @@ import com.horto.backend.core.entities.SupplierOffer;
 import com.horto.backend.infra.dto.supplier.request.SupplierPatchDTO;
 import com.horto.backend.infra.dto.supplierOffer.request.SupplierOfferPatchDTO;
 import com.horto.backend.infra.dto.supplierOffer.request.SupplierOfferRequestDTO;
+import com.horto.backend.infra.dto.supplierOffer.response.SupplierOffersGroupedResponseDTO;
 import com.horto.backend.infra.dto.supplierOffer.response.SupplierOffersSummaryDTO;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public interface SupplierOfferGateway {
 
     SupplierOffer patchOfferById(Long id, SupplierOfferPatchDTO patchDTO);
 
-    List<SupplierOffer> getOffersByProductAndSupplierId(Long productId, Long supplierId);
+    SupplierOffersGroupedResponseDTO getOffersByProductAndSupplierId(Long productId, Long supplierId);
 
     List<SupplierOffersSummaryDTO> getOffersByProductId(Long productId);
 

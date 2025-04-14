@@ -12,12 +12,14 @@ import com.horto.backend.infra.dto.supplier.response.SupplierNameDTO;
 import com.horto.backend.infra.dto.supplierOffer.request.SupplierOfferPatchDTO;
 import com.horto.backend.infra.dto.supplierOffer.request.SupplierOfferRequestDTO;
 import com.horto.backend.infra.dto.supplierOffer.response.PriceRangeDTO;
+import com.horto.backend.infra.dto.supplierOffer.response.SupplierOffersGroupedResponseDTO;
 import com.horto.backend.infra.dto.supplierOffer.response.SupplierOffersSummaryDTO;
 import com.horto.backend.infra.mapper.*;
 import com.horto.backend.infra.persistence.entities.SupplierEntity;
 import com.horto.backend.infra.persistence.entities.SupplierOfferEntity;
 import com.horto.backend.infra.persistence.repositories.SupplierOfferRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -144,13 +146,17 @@ public class SupplierOfferRepoGateway implements SupplierOfferGateway {
     }
 
     @Override
-    public List<SupplierOffer> getOffersByProductAndSupplierId(Long productId, Long supplierId) {
-        getProductByIdCase.execute(productId);
-        getSupplierByIdCase.execute(supplierId);
+    public SupplierOffersGroupedResponseDTO getOffersByProductAndSupplierId(Long productId, Long supplierId) {
+        Product product = getProductByIdCase.execute(productId);
+        Supplier supplier = getSupplierByIdCase.execute(supplierId);
         List<SupplierOfferEntity> offersList = supplierOfferRepository.findAllByProduct_IdAndSupplier_Id(productId, supplierId);
-        return offersList.stream()
-                .map(supplierOfferMapper::toDomain)
-                .toList();
+        return new SupplierOffersGroupedResponseDTO(
+                productMapper.toNameResponseDTO(product),
+                supplierMapper.toResponseDTO(supplier),
+                offersList.stream()
+                        .map(supplierOfferMapper::toResponseDTO)
+                        .toList()
+        );
     }
 
     @Override

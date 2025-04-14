@@ -5,8 +5,8 @@ import com.horto.backend.infra.dto.supplier.response.SupplierResponseDTO;
 
 import java.util.List;
 
-public record SupplierOffersGroupedResponseDTO<SupplierOfferSlimResponseDTO>(
+public record SupplierOffersGroupedResponseDTO<T>(
         ProductNameResponseDTO product,
         SupplierResponseDTO supplier,
-        List<SupplierOfferSlimResponseDTO> offers
+        List<T> offers
 ) { }
