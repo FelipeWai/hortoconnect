@@ -8,17 +8,22 @@ import com.horto.backend.core.usecases.product.get.GetProductByIdCase;
 import com.horto.backend.core.usecases.quality.get.GetQualityByIdCase;
 import com.horto.backend.core.usecases.size.get.GetSizeByIdCase;
 import com.horto.backend.core.usecases.suppliers.get.GetSupplierByIdCase;
+import com.horto.backend.infra.dto.product.response.ProductNameResponseDTO;
 import com.horto.backend.infra.dto.supplier.response.SupplierNameDTO;
 import com.horto.backend.infra.dto.supplierOffer.request.SupplierOfferPatchDTO;
 import com.horto.backend.infra.dto.supplierOffer.request.SupplierOfferRequestDTO;
 import com.horto.backend.infra.dto.supplierOffer.response.PriceRangeDTO;
+import com.horto.backend.infra.dto.supplierOffer.response.SupplierOfferResponseDTO;
 import com.horto.backend.infra.dto.supplierOffer.response.SupplierOffersGroupedResponseDTO;
 import com.horto.backend.infra.dto.supplierOffer.response.SupplierOffersSummaryDTO;
+import com.horto.backend.infra.filters.offer.OfferFilter;
+import com.horto.backend.infra.filters.offer.OfferSpecification;
 import com.horto.backend.infra.mapper.*;
 import com.horto.backend.infra.persistence.entities.SupplierEntity;
 import com.horto.backend.infra.persistence.entities.SupplierOfferEntity;
 import com.horto.backend.infra.persistence.repositories.SupplierOfferRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
@@ -43,12 +48,19 @@ public class SupplierOfferRepoGateway implements SupplierOfferGateway {
     private final QualityMapper qualityMapper;
 
     @Override
-    public List<SupplierOffer> getOffersBySupplierId(Long id) {
+    public List<SupplierOffersGroupedResponseDTO<SupplierOfferResponseDTO>> getOffersBySupplierId(Long id) {
         getSupplierByIdCase.execute(id);
 
         List<SupplierOfferEntity> entityList = supplierOfferRepository.findAllBySupplier_Id(id);
-        return entityList.stream()
-                .map(supplierOfferMapper::toDomain)
+
+        Map<ProductNameResponseDTO, List<SupplierOfferResponseDTO>> grouped = entityList.stream()
+                .collect(Collectors.groupingBy(
+                        entity -> productMapper.toNameResponseDTO(productMapper.toDomain(entity.getProduct())),
+                        Collectors.mapping(supplierOfferMapper::toResponseDTO, Collectors.toList())
+                ));
+
+        return grouped.entrySet().stream()
+                .map(entry -> new SupplierOffersGroupedResponseDTO<>(entry.getKey(), entry.getValue()))
                 .toList();
     }
 
@@ -88,10 +100,11 @@ public class SupplierOfferRepoGateway implements SupplierOfferGateway {
     }
 
     @Override
-    public List<SupplierOffersSummaryDTO> getOffersByProductId(Long productId) {
+    public List<SupplierOffersSummaryDTO> getOffersByProductId(Long productId, OfferFilter filter) {
         getProductByIdCase.execute(productId);
 
-        List<SupplierOfferEntity> offersList = supplierOfferRepository.findByProduct_IdOrderByMinPriceAsc(productId);
+        OfferSpecification spec = new OfferSpecification(productId, filter);
+        List<SupplierOfferEntity> offersList = supplierOfferRepository.findAll(spec, Sort.by("minPrice").ascending());
         if (offersList.isEmpty()) {
             throw new OffersNotFoundException(productId.toString());
         }
@@ -148,11 +161,9 @@ public class SupplierOfferRepoGateway implements SupplierOfferGateway {
     @Override
     public SupplierOffersGroupedResponseDTO getOffersByProductAndSupplierId(Long productId, Long supplierId) {
         Product product = getProductByIdCase.execute(productId);
-        Supplier supplier = getSupplierByIdCase.execute(supplierId);
         List<SupplierOfferEntity> offersList = supplierOfferRepository.findAllByProduct_IdAndSupplier_Id(productId, supplierId);
         return new SupplierOffersGroupedResponseDTO(
                 productMapper.toNameResponseDTO(product),
-                supplierMapper.toResponseDTO(supplier),
                 offersList.stream()
                         .map(supplierOfferMapper::toResponseDTO)
                         .toList()

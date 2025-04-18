@@ -1,7 +1,5 @@
 package com.horto.backend.infra.presentation;
 
-import com.horto.backend.core.entities.Product;
-import com.horto.backend.core.entities.Supplier;
 import com.horto.backend.core.entities.SupplierOffer;
 import com.horto.backend.core.usecases.product.get.GetProductByIdCase;
 import com.horto.backend.core.usecases.supplierOffer.delete.DeleteOfferByIdCase;
@@ -17,6 +15,7 @@ import com.horto.backend.infra.dto.supplierOffer.request.SupplierOfferRequestDTO
 import com.horto.backend.infra.dto.supplierOffer.response.SupplierOfferResponseDTO;
 import com.horto.backend.infra.dto.supplierOffer.response.SupplierOffersGroupedResponseDTO;
 import com.horto.backend.infra.dto.supplierOffer.response.SupplierOffersSummaryDTO;
+import com.horto.backend.infra.filters.offer.OfferFilter;
 import com.horto.backend.infra.mapper.ProductMapper;
 import com.horto.backend.infra.mapper.SupplierMapper;
 import com.horto.backend.infra.mapper.SupplierOfferMapper;
@@ -58,23 +57,30 @@ public class SupplierOfferController {
     }
 
     @GetMapping("/supplier/{id}")
-    public ResponseEntity<List<SupplierOfferResponseDTO>> getOffersBySupplierId(@PathVariable Long id) {
-        List<SupplierOffer> offerList = getOffersBySupplierIdCase.execute(id);
-        return ResponseEntity.ok(offerList.stream()
-                .map(supplierOfferMapper::toResponseDTO)
-                .toList()
-        );
+    public ResponseEntity<List<SupplierOffersGroupedResponseDTO<SupplierOfferResponseDTO>>> getAllOffersBySupplierId(@PathVariable Long id) {
+        List<SupplierOffersGroupedResponseDTO<SupplierOfferResponseDTO>> groupedOffers = getOffersBySupplierIdCase.execute(id);
+        return ResponseEntity.ok(groupedOffers);
     }
 
-    @GetMapping("/product/{productId}/supplier/{supplierId}/offers")
-    public ResponseEntity<SupplierOffersGroupedResponseDTO> getOffersByProductId(@PathVariable Long productId, @PathVariable Long supplierId) {
+    @GetMapping("/product/{productId}/supplier/{supplierId}")
+    public ResponseEntity<SupplierOffersGroupedResponseDTO> getOffersByProductAndSuplierId(@PathVariable Long productId, @PathVariable Long supplierId) {
         SupplierOffersGroupedResponseDTO offerList = getOffersByProductAndSupplierCase.execute(productId, supplierId);
         return ResponseEntity.ok(offerList);
     }
 
     @GetMapping("/product/{productId}/suppliers")
-    public ResponseEntity<List<SupplierOffersSummaryDTO>> getSuppliersByProduct(@PathVariable Long productId) {
-        return ResponseEntity.ok(getOffersByProductCase.execute(productId));
+    public ResponseEntity<List<SupplierOffersSummaryDTO>> getSuppliersByProduct(
+            @PathVariable Long productId,
+            @RequestParam(required = false) Long qualityId,
+            @RequestParam(required = false) Long sizeId) {
+
+        OfferFilter offerFilter = new OfferFilter();
+        offerFilter.setQualityId(qualityId);
+        offerFilter.setSizeId(sizeId);
+
+        List<SupplierOffersSummaryDTO> offers = getOffersByProductCase.execute(productId, offerFilter);
+
+        return ResponseEntity.ok(offers);
     }
 
     @PostMapping

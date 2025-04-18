@@ -2,13 +2,14 @@ package com.horto.backend.infra.persistence.repositories;
 
 import com.horto.backend.infra.persistence.entities.SupplierOfferEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface SupplierOfferRepository extends JpaRepository<SupplierOfferEntity, Long> {
+public interface SupplierOfferRepository extends JpaRepository<SupplierOfferEntity, Long>, JpaSpecificationExecutor<SupplierOfferEntity> {
     List<SupplierOfferEntity> findAllBySupplier_Id(Long supplierId);
 
     List<SupplierOfferEntity> findByProduct_IdOrderByMinPriceAsc(Long productId);
