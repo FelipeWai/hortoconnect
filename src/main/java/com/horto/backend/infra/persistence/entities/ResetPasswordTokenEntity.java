@@ -29,6 +29,4 @@ public class ResetPasswordTokenEntity {
 
     @Column(nullable = false)
     private boolean used = false;
-
-
 }

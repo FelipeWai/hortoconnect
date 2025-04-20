@@ -17,7 +17,7 @@ public class DataSourceConfig {
 
     @Bean
     public DataSource dataSource() {
-        JsonNode secret = awsSecretManagerService.getSecret("secret-horto-db-dev");
+        JsonNode secret = awsSecretManagerService.getSecret("horto-dev-db");
 
         String host = getJsonValue(secret, "host");
         String port = getJsonValue(secret, "port");
