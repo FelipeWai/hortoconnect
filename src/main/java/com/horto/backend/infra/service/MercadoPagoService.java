@@ -1,15 +1,25 @@
 package com.horto.backend.infra.service;
 
 import com.horto.backend.core.enums.Plans;
-import com.horto.backend.infra.dto.pagamento.PaymentDTO;
+import com.horto.backend.infra.config.aws.secrets.MercadoPagoTokenConfig;
+import com.horto.backend.infra.dto.pagamento.CardPaymentDTO;
+import com.horto.backend.infra.dto.pagamento.CardPaymentResponseDTO;
+import com.horto.backend.infra.dto.pagamento.PixPaymentDTO;
+import com.horto.backend.infra.dto.pagamento.PixPaymentRespondeDTO;
+import com.horto.backend.infra.exception.pagamento.MercadoPagoException;
+import com.mercadopago.MercadoPagoConfig;
+import com.mercadopago.client.common.IdentificationRequest;
+import com.mercadopago.client.payment.PaymentClient;
+import com.mercadopago.client.payment.PaymentCreateRequest;
+import com.mercadopago.client.payment.PaymentPayerRequest;
+import com.mercadopago.core.MPRequestOptions;
+import com.mercadopago.exceptions.MPApiException;
+import com.mercadopago.exceptions.MPException;
+import com.mercadopago.resources.payment.Payment;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -17,42 +27,96 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class MercadoPagoService {
+    private final MercadoPagoTokenConfig mercadoPagoConfig;
 
-    private final WebClient mercadoPagoClient;
-
-    public Map<String, Object> criarPagamentoCartao(PaymentDTO dto) {
-        Map<String, Object> payer = Map.of(
-                "email", dto.userEmail()
-        );
-
-        Map<String, Object> body = new HashMap<>();
-        body.put("transaction_amount", Plans.getValorPorId(dto.planId()));
-        body.put("token", dto.token());
-        body.put("description", "Doação para ONG de Adoção");
-        body.put("installments", 1);
-        body.put("payment_method_id", dto.payment_method());
-        body.put("payer", payer);
-
+    public CardPaymentResponseDTO createCardPayment(CardPaymentDTO cardPaymentDTO) {
         try {
-            return mercadoPagoClient.post()
-                    .uri("/v1/payments")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .header("X-Idempotency-Key", UUID.randomUUID().toString())
-                    .bodyValue(body)
-                    .retrieve()
-                    .onStatus(HttpStatusCode::isError, response ->
-                            response.bodyToMono(String.class)
-                                    .flatMap(error -> {
-                                        System.out.println("Erro Mercado Pago: " + error);
-                                        return Mono.error(new RuntimeException("Erro ao processar pagamento: " + error));
-                                    })
-                    )
-                    .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
-                    .block();
-        } catch (Exception e) {
-            throw new RuntimeException("Falha na comunicação com o Mercado Pago: " + e.getMessage());
+            MercadoPagoConfig.setAccessToken(mercadoPagoConfig.getSecret());
+
+            PaymentClient paymentClient = new PaymentClient();
+
+            PaymentCreateRequest paymentCreateRequest =
+                    PaymentCreateRequest.builder()
+                            .transactionAmount(Plans.getValorPorId(cardPaymentDTO.planId()))
+                            .token(cardPaymentDTO.token())
+                            .description(cardPaymentDTO.description())
+                            .installments(cardPaymentDTO.installments())
+                            .paymentMethodId(cardPaymentDTO.paymentMethodId())
+                            .payer(
+                                    PaymentPayerRequest.builder()
+                                            .email(cardPaymentDTO.payer().email())
+                                            .identification(
+                                                    IdentificationRequest.builder()
+                                                            .type(cardPaymentDTO.payer().identification().type())
+                                                            .number(cardPaymentDTO.payer().identification().number())
+                                                            .build())
+                                            .build())
+                            .build();
+
+            Payment createdPayment = paymentClient.create(paymentCreateRequest);
+
+            return new CardPaymentResponseDTO(
+                    createdPayment.getId(),
+                    String.valueOf(createdPayment.getStatus()),
+                    createdPayment.getStatusDetail());
+
+        } catch (MPApiException apiException) {
+            System.out.println(apiException.getApiResponse().getContent());
+            throw new MercadoPagoException(apiException.getApiResponse().getContent());
+        } catch (MPException exception) {
+            System.out.println(exception.getMessage());
+            throw new MercadoPagoException(exception.getMessage());
         }
     }
 
+    public PixPaymentRespondeDTO createPixPayment(PixPaymentDTO pixPaymentDTO) {
+        try{
+            MercadoPagoConfig.setAccessToken(mercadoPagoConfig.getSecret());
 
+            Map<String, String> customHeaders = new HashMap<>();
+            customHeaders.put("x-idempotency-key", UUID.randomUUID().toString());
+
+            MPRequestOptions requestOptions = MPRequestOptions.builder()
+                    .customHeaders(customHeaders)
+                    .build();
+
+            PaymentClient client = new PaymentClient();
+
+            OffsetDateTime now = OffsetDateTime.now();
+
+            PaymentCreateRequest paymentCreateRequest =
+                    PaymentCreateRequest.builder()
+                            .transactionAmount(Plans.getValorPorId(pixPaymentDTO.planId()))
+                            .description("Título do produto")
+                            .paymentMethodId(pixPaymentDTO.paymentMethodId())
+                            .dateOfExpiration(now.plusMinutes(15))
+                            .payer(
+                                    PaymentPayerRequest.builder()
+                                            .email(pixPaymentDTO.payer().email())
+                                            .firstName(pixPaymentDTO.payer().email())
+                                            .identification(
+                                                    IdentificationRequest.builder()
+                                                            .type(pixPaymentDTO.payer().identification().type())
+                                                            .number(pixPaymentDTO.payer().identification().number())
+                                                            .build())
+                                            .build())
+                            .build();
+
+            Payment createdPayment = client.create(paymentCreateRequest, requestOptions);
+
+            return new PixPaymentRespondeDTO(
+                    createdPayment.getId(),
+                    createdPayment.getStatus(),
+                    createdPayment.getStatusDetail(),
+                    createdPayment.getPointOfInteraction().getTransactionData().getQrCodeBase64(),
+                    createdPayment.getPointOfInteraction().getTransactionData().getQrCode());
+
+        } catch (MPApiException apiException) {
+            System.out.println(apiException.getApiResponse().getContent());
+            throw new MercadoPagoException(apiException.getApiResponse().getContent());
+        } catch (MPException exception) {
+            System.out.println(exception.getMessage());
+            throw new MercadoPagoException(exception.getMessage());
+        }
+    }
 }

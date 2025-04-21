@@ -28,6 +28,7 @@ public class EmailService {
             context.setVariables(templateModel);
             String htmlContent = templateEngine.process("email-template", context);
 
+            helper.setFrom("hortoconnect@gmail.com");
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(htmlContent, true);

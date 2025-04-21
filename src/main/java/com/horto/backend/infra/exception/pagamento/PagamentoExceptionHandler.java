@@ -20,6 +20,15 @@ public class PagamentoExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
     }
 
+    @ExceptionHandler(MercadoPagoException.class)
+    public ResponseEntity<ErrorResponse> handleCategoryNotFoundException(MercadoPagoException ex) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.FORBIDDEN.value(),
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
+    }
+
 
     public static class ErrorResponse {
         private final int status;

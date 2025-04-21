@@ -19,16 +19,3 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
-
-  mercadopago:
-    access:
-      token: TEST-1320768292574611-040312-e8b666607ac4d00f6c316ef431136035-2366073347
-
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: hortoconnect@gmail.com
-    password: rdyz zldu kvgp gwun
-    properties:
-      mail.smtp.auth: true
-      mail.smtp.starttls.enable: true

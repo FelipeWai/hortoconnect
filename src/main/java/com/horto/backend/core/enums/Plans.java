@@ -1,19 +1,21 @@
 package com.horto.backend.core.enums;
 
+import java.math.BigDecimal;
+
 public enum Plans {
-    BASICO(1L, 1.0),
-    PREMIUM(2L, 350.00),
-    VIP(3L, 20.0);
+    BASICO(1L, new BigDecimal("1.0")),
+    PREMIUM(2L, new BigDecimal("350.00")),
+    VIP(3L, new BigDecimal("20.0"));
 
     private final Long id;
-    private final Double valor;
+    private final BigDecimal valor;
 
-    Plans(Long id, Double valor) {
+    Plans(Long id, BigDecimal valor) {
         this.id = id;
         this.valor = valor;
     }
 
-    public static Double getValorPorId(Long id) {
+    public static BigDecimal getValorPorId(Long id) {
         for (Plans plano : values()) {
             if (plano.id.equals(id)) {
                 return plano.valor;
