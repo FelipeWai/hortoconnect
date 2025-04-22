@@ -119,4 +119,27 @@ public class MercadoPagoService {
             throw new MercadoPagoException(exception.getMessage());
         }
     }
+
+
+    public void consultarPagamento(Long pagamentoId) {
+        try {
+            MercadoPagoConfig.setAccessToken(mercadoPagoConfig.getSecret());
+
+            PaymentClient client = new PaymentClient();
+            Payment pagamento = client.get(pagamentoId);
+
+            System.out.println("✅ Status: " + pagamento.getStatus());
+            System.out.println("🔍 StatusDetail: " + pagamento.getStatusDetail());
+            System.out.println("💸 Valor: " + pagamento.getTransactionAmount());
+            System.out.println("👤 Email do pagador: " + pagamento.getPayer().getEmail());
+            System.out.println("🗓️ Data da aprovação: " + pagamento.getDateApproved());
+
+        } catch (MPApiException apiException) {
+            System.out.println(apiException.getApiResponse().getContent());
+            throw new MercadoPagoException(apiException.getApiResponse().getContent());
+        } catch (MPException exception) {
+            System.out.println(exception.getMessage());
+            throw new MercadoPagoException(exception.getMessage());
+        }
+    }
 }

@@ -3,9 +3,7 @@ package com.horto.backend.core.enums;
 import java.math.BigDecimal;
 
 public enum Plans {
-    BASICO(1L, new BigDecimal("1.0")),
-    PREMIUM(2L, new BigDecimal("350.00")),
-    VIP(3L, new BigDecimal("20.0"));
+    BASICO(1L, new BigDecimal("5.0"));
 
     private final Long id;
     private final BigDecimal valor;

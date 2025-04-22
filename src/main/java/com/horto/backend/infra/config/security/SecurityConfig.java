@@ -72,6 +72,7 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.POST, "/supplier-offer").hasRole("ADMIN")
 
+                        .requestMatchers(HttpMethod.POST, "/payment/webhook").permitAll()
 
                         .anyRequest().authenticated()
                 )
