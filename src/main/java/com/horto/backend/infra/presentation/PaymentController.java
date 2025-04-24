@@ -1,10 +1,14 @@
-package com.horto.backend.infra.presentation.pagamento;
+package com.horto.backend.infra.presentation;
 
+import com.horto.backend.core.entities.Payment;
+import com.horto.backend.core.usecases.payment.pixPayment.ProcessPixPaymentUseCase;
+import com.horto.backend.core.usecases.payment.pixPayment.UpdatePaymentStatusUseCase;
 import com.horto.backend.infra.config.security.TokenService;
 import com.horto.backend.infra.dto.pagamento.CardPaymentDTO;
 import com.horto.backend.infra.dto.pagamento.CardPaymentResponseDTO;
 import com.horto.backend.infra.dto.pagamento.PixPaymentDTO;
 import com.horto.backend.infra.dto.pagamento.PixPaymentRespondeDTO;
+import com.horto.backend.infra.mapper.PaymentMapper;
 import com.horto.backend.infra.service.MercadoPagoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +21,12 @@ import java.util.Map;
 @RestController
 @RequestMapping("/payment")
 @RequiredArgsConstructor
-public class PagamentoController {
+public class PaymentController {
+
+    private final ProcessPixPaymentUseCase processPixPaymentUseCase;
+    private final UpdatePaymentStatusUseCase updatePaymentStatusUseCase;
+
+    private final PaymentMapper paymentMapper;
 
     private final MercadoPagoService mercadoPagoService;
     private final TokenService tokenService;
@@ -41,17 +50,17 @@ public class PagamentoController {
     @PostMapping("/pix")
     public ResponseEntity<PixPaymentRespondeDTO> processPixPayment(
             @RequestBody @Valid PixPaymentDTO pixPaymentDTO,
-            @RequestHeader("Authorization") String authHeader){
+            @RequestHeader("Authorization") String authHeader) {
 
         String token = authHeader.replace("Bearer ", "");
         String tokenEmail = tokenService.getEmailFromToken(token);
 
         if (tokenEmail == null || !tokenEmail.equals(pixPaymentDTO.payer().email())) {
-            throw new RuntimeException("Token invalido");
+            throw new RuntimeException("Token inválido");
         }
-
-        PixPaymentRespondeDTO pixPayment = mercadoPagoService.createPixPayment(pixPaymentDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(pixPayment);
+        Payment payment = processPixPaymentUseCase.execute(pixPaymentDTO);
+        PixPaymentRespondeDTO responseDTO = paymentMapper.toPixResponseDTO(payment);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
 
     @PostMapping("/webhook")
@@ -65,7 +74,7 @@ public class PagamentoController {
         if ("payment".equals(type) && dataId != null) {
             try {
                 Long pagamentoId = Long.parseLong(dataId);
-                mercadoPagoService.consultarPagamento(pagamentoId);
+                updatePaymentStatusUseCase.execute(pagamentoId);
             } catch (NumberFormatException e) {
                 System.out.println("❌ ID do pagamento inválido: " + dataId);
             }

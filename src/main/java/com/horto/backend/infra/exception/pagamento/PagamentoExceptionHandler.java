@@ -1,8 +1,6 @@
 package com.horto.backend.infra.exception.pagamento;
 
-import com.horto.backend.core.exceptions.payment.InvalidPaymentMethodException;
-import com.horto.backend.core.exceptions.quality.QualityNotFoundException;
-import com.horto.backend.infra.exception.global.GlobalExceptionHandler;
+import com.horto.backend.core.exceptions.payment.InvalidPaymentException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -11,8 +9,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class PagamentoExceptionHandler {
 
-    @ExceptionHandler(InvalidPaymentMethodException.class)
-    public ResponseEntity<ErrorResponse> handleCategoryNotFoundException(InvalidPaymentMethodException ex) {
+    @ExceptionHandler(InvalidPaymentException.class)
+    public ResponseEntity<ErrorResponse> handleCategoryNotFoundException(InvalidPaymentException ex) {
         ErrorResponse error = new ErrorResponse(
                 HttpStatus.FORBIDDEN.value(),
                 ex.getMessage()
