@@ -1,14 +1,19 @@
 package com.horto.backend.infra.gateway;
 
 import com.horto.backend.core.entities.Subscription;
+import com.horto.backend.core.entities.User;
 import com.horto.backend.core.enums.SubscriptionStatus;
 import com.horto.backend.core.exceptions.payment.InvalidPaymentException;
+import com.horto.backend.core.exceptions.user.notFound.UserNotFoundByIdException;
 import com.horto.backend.core.gateway.SubscriptionGateway;
 import com.horto.backend.infra.mapper.SubscriptionMapper;
+import com.horto.backend.infra.mapper.UserMapper;
 import com.horto.backend.infra.persistence.entities.PaymentEntity;
 import com.horto.backend.infra.persistence.entities.SubscriptionEntity;
+import com.horto.backend.infra.persistence.entities.UserEntity;
 import com.horto.backend.infra.persistence.repositories.PaymentRepository;
 import com.horto.backend.infra.persistence.repositories.SubscriptionRepository;
+import com.horto.backend.infra.persistence.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -24,9 +29,10 @@ import java.util.Optional;
 public class SubscriptionRepoGateway implements SubscriptionGateway {
 
     private final PaymentRepository paymentRepository;
-
+    private final UserRepository userRepository;
     private final SubscriptionRepository subscriptionRepository;
     private final SubscriptionMapper subscriptionMapper;
+    private final UserMapper userMapper;
 
     @Override
     public void createOrUpdateSubscription(Long userId, Long planId) {
@@ -42,6 +48,17 @@ public class SubscriptionRepoGateway implements SubscriptionGateway {
                 subscriptionEntity.setStatus(SubscriptionStatus.ACTIVE);
                 subscriptionEntity.setPlanId(planId);
                 subscriptionEntity.setLastPayment(paymentEntityList.get(0));
+            }else{
+                UserEntity user = userRepository.findById(userId)
+                        .orElseThrow(() -> new UserNotFoundByIdException(userId.toString()));
+                SubscriptionEntity subscriptionEntity = new SubscriptionEntity();
+                subscriptionEntity.setUser(user);
+                subscriptionEntity.setPlanId(planId);
+                subscriptionEntity.setStartDate(LocalDateTime.now());
+                subscriptionEntity.setEndDate(LocalDateTime.now().plusDays(30));
+                subscriptionEntity.setStatus(SubscriptionStatus.ACTIVE);
+                subscriptionEntity.setLastPayment(paymentEntityList.get(0));
+                subscriptionRepository.save(subscriptionEntity);
             }
         }
     }
