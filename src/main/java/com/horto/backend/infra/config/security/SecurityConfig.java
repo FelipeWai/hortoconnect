@@ -86,7 +86,7 @@ public class SecurityConfig {
                 "http://localhost:5173",
                 "http://127.0.0.1:5173",
                 "https://planilha-horto.vercel.app",
-                "https://main.d1fkyt0142pwdw.amplifyapp.com/"
+                "https://main.d1hko5ia2xrdhb.amplifyapp.com/"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(Collections.singletonList("*"));
