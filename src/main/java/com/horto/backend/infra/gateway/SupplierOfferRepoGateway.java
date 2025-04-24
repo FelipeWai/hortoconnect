@@ -106,7 +106,7 @@ public class SupplierOfferRepoGateway implements SupplierOfferGateway {
         OfferSpecification spec = new OfferSpecification(productId, filter);
         List<SupplierOfferEntity> offersList = supplierOfferRepository.findAll(spec, Sort.by("minPrice").ascending());
         if (offersList.isEmpty()) {
-            throw new OffersNotFoundException(productId.toString());
+            return List.of();
         }
 
         Map<Long, List<SupplierOfferEntity>> offersBySupplierId = offersList.stream()
