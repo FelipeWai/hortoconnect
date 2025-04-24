@@ -44,14 +44,17 @@ public class SecurityFilter extends OncePerRequestFilter {
             JWTUserData jwtUserData = optionalJWTUserData.get();
             String role = tokenService.getRoleFromToken(token); // ex: "ADMIN", "USER", etc.
 
-            // Se não for ADMIN, verifica assinatura
-            if (!"ADMIN".equalsIgnoreCase(role)) {
-                var subscriptionOpt = subscriptionRepository.findByUser_Id(jwtUserData.id());
+            // Ajuste aqui para verificar se a URL começa com /api/payment
+            if (!request.getRequestURI().startsWith("/api/payment")) {
+                // Se não for ADMIN, verifica assinatura
+                if (!"ADMIN".equalsIgnoreCase(role)) {
+                    var subscriptionOpt = subscriptionRepository.findByUser_Id(jwtUserData.id());
 
-                if (subscriptionOpt.isEmpty() || subscriptionOpt.get().getStatus() != SubscriptionStatus.ACTIVE) {
-                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                    response.getWriter().write("Acesso negado: assinatura inativa ou inexistente.");
-                    return;
+                    if (subscriptionOpt.isEmpty() || subscriptionOpt.get().getStatus() != SubscriptionStatus.ACTIVE) {
+                        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                        response.getWriter().write("Acesso negado: assinatura inativa ou inexistente.");
+                        return;
+                    }
                 }
             }
 
